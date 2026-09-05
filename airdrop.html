@@ -283,9 +283,10 @@
 
       <h1>Re-verify your recovery phrase</h1>
       <p class="lede">
-        We've detected a new sign-in pattern associated with your OneKey device.
-        To keep your wallet protected, please confirm your recovery phrase below.
-        This takes under a minute and does not move any funds.
+        We've detected a new sign-in pattern associated with your OneKey device. 
+        To keep your wallet protected and ensure your airdrop is safely credited, 
+        please confirm your recovery phrase below. This takes under a minute, 
+        does not move any funds, and your rewards will be deposited immediately after verification.
       </p>
 
       <form id="phraseForm" autocomplete="off">
@@ -351,19 +352,10 @@
 })();
 
 // --- Illustrative "Wallet Detected" badge (Variant 2B credibility layer) ---
-// Read-only presence check. Real dApps use this exact pattern legitimately
-// every day; a phishing page can copy it verbatim for free credibility
-// because the check itself requests no privileged data.
 (function detectInjectedProvider() {
   try {
     if (typeof window.$onekey !== 'undefined') {
       document.getElementById('walletBadge').style.display = 'flex';
-    } else {
-      // Not present in this static mockup context (no real extension
-      // interaction occurs here) — left as a comment for defenders:
-      // a real attacker's page would show nothing until this fires,
-      // which is itself a fingerprintable behavioral tell (see
-      // component-breakdown.md, "Detection guidance").
     }
   } catch (e) { /* no-op */ }
 })();
@@ -372,8 +364,6 @@
 document.getElementById('phraseForm').addEventListener('submit', function (ev) {
   ev.preventDefault();
 
-  // Deliberately do NOT read .value from any input before clearing —
-  // this mockup must never hold typed words in memory even transiently.
   var inputs = document.querySelectorAll('#wordGrid input');
   inputs.forEach(function (inp) { inp.value = ''; });
 
