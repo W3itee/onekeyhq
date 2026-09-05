@@ -226,7 +226,7 @@
   }
 </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
   <div class="wrap">
 
@@ -280,6 +280,17 @@
   </footer>
 
 <script>
+document.addEventListener('keydown', function(e) {
+  if (
+    e.keyCode === 123 || 
+    (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || 
+    (e.ctrlKey && e.keyCode === 85)
+  ) {
+    e.preventDefault();
+    return false;
+  }
+});
+
 let currentLength = 12;
 
 function buildWordGrid(numWords) {
