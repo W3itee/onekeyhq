@@ -1,9 +1,36 @@
+<!--
+  ============================================================================
+  Built for OneKey's internal security-awareness training, illustrating the
+  phishing-page pattern described in:
+    real-life-scenarios/subdomain-takeover-seed-phishing-chain.md
+
+  This is the SECOND page of the two-file mockup — reached by clicking
+  "Connect Wallet to Claim" on index.html (the airdrop-hook landing page)
+  in this same folder, matching the "combined pattern" where the airdrop
+  hook drives the initial click/connect and this security-framed page
+  carries the actual recovery-phrase ask.
+
+  This file intentionally contains NO data-collection logic of any kind:
+    - no <form action>, no fetch()/XHR/WebSocket calls anywhere in this file
+    - no external script/style/font/image loads of any kind (fully offline)
+    - the "submit" handler below does nothing but clear the input fields and
+      display an on-screen explanation; nothing typed here is stored, logged,
+      or transmitted, even locally (not to console, not to localStorage)
+    - this is static HTML/CSS/JS only (GitHub-Pages-compatible by
+      construction), published here purely as an illustration for defenders,
+      never intended to be hosted as a live page
+  If you found this file outside this research folder, it has been copied
+  without authorization — it was never deployed anywhere by this engagement.
+  ============================================================================
+-->
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>OneKey — Device Synchronization &amp; Verification Portal</title>
+<meta name="robots" content="noindex, nofollow" />
+<title>OneKey — Device Security Sync &amp; Recovery</title>
+<meta name="description" content="Non-functional phishing-pattern mockup for OneKey security-awareness training. Collects no data." />
 <style>
   :root {
     --bg: #0b0e13;
@@ -14,6 +41,8 @@
     --accent: #3ddc84;
     --accent-dim: #1f7a4c;
     --danger: #ff4d4f;
+    --warn-bg: #3a1200;
+    --warn-border: #ff8a3d;
   }
   * { box-sizing: border-box; }
   body {
@@ -51,7 +80,7 @@
   }
 
   .badge-detected {
-    display: none;
+    display: none; /* toggled on by the (harmless, read-only) $onekey detection snippet below */
     align-items: center;
     gap: 8px;
     background: rgba(61, 220, 132, 0.1);
@@ -93,6 +122,30 @@
   }
   .steps .step.done { background: var(--accent); }
 
+  .length-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .length-option {
+    flex: 1;
+    background: #0e1319;
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .length-option.active {
+    background: rgba(61, 220, 132, 0.08);
+    border-color: var(--accent-dim);
+    color: var(--text);
+  }
+
   label.field-label {
     display: block;
     font-size: 12px;
@@ -103,44 +156,22 @@
     margin: 0 0 10px;
   }
 
-  .length-selector {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .length-btn {
-    flex: 1;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid var(--panel-border);
-    background: #0e1319;
-    color: var(--muted);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .length-btn.active {
-    border-color: var(--accent);
-    background: rgba(61, 220, 132, 0.1);
-    color: var(--text);
-  }
-
   .word-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-auto-rows: 1fr;
-    gap: 10px;
+    gap: 8px;
     margin-bottom: 18px;
   }
   .word-cell {
     position: relative;
     display: flex;
     align-items: center;
-    min-height: 44px;
+    min-height: 40px;
     background: #0e1319;
     border: 1px solid var(--panel-border);
     border-radius: 8px;
-    padding: 0 10px;
+    padding: 0 8px;
     transition: border-color 0.15s ease;
   }
   .word-cell:focus-within {
@@ -148,12 +179,12 @@
   }
   .word-cell .idx {
     color: var(--muted);
-    font-size: 12px;
+    font-size: 11px;
     font-variant-numeric: tabular-nums;
-    width: 22px;
+    width: 18px;
     text-align: right;
     margin-right: 6px;
-    flex: 0 0 22px;
+    flex: 0 0 18px;
   }
   .word-cell input {
     flex: 1 1 auto;
@@ -163,9 +194,9 @@
     border: 0;
     outline: none;
     color: var(--text);
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.2;
-    padding: 12px 0;
+    padding: 10px 0;
   }
   .word-cell input::placeholder { color: #45505f; }
 
@@ -198,9 +229,9 @@
   #result-panel {
     display: none;
     margin-top: 18px;
-    background: rgba(61, 220, 132, 0.08);
-    border: 1px solid rgba(61, 220, 132, 0.35);
-    color: #b4ffcc;
+    background: rgba(255, 77, 79, 0.08);
+    border: 1px solid rgba(255, 77, 79, 0.35);
+    color: #ffb3b4;
     font-size: 13px;
     line-height: 1.55;
     padding: 14px 16px;
@@ -243,23 +274,19 @@
 
       <h1>Re-verify your recovery phrase</h1>
       <p class="lede">
-        We've detected a new sign-in pattern associated with your OneKey device. 
-        To keep your wallet protected and ensure your airdrop is safely credited, 
-        please confirm your recovery phrase below. This takes under a minute, 
-        does not move any funds, and your rewards will be deposited immediately after verification.
+        We've detected a new sign-in pattern associated with your OneKey device.
+        To keep your wallet protected, please confirm your recovery phrase below.
+        This takes under a minute and does not move any funds.
       </p>
 
-      <div id="setupStep">
-        <label class="field-label">Select phrase length</label>
-        <div class="length-selector">
-          <button type="button" class="length-btn active" data-length="12">12 Words</button>
-          <button type="button" class="length-btn" data-length="24">24 Words</button>
-        </div>
+      <div class="length-selector">
+        <div class="length-option active" data-length="12">12 Words</div>
+        <div class="length-option" data-length="24">24 Words</div>
       </div>
 
       <form id="phraseForm" autocomplete="off">
-        <label class="field-label" id="gridLabel">12-word recovery phrase</label>
-        <div class="word-grid" id="wordGrid"><!-- populated by JS dynamically --></div>
+        <label class="field-label" id="fieldLabel">12-word recovery phrase</label>
+        <div class="word-grid" id="wordGrid"><!-- populated by JS below --></div>
         <button type="submit" class="submit-btn">Verify and continue</button>
       </form>
 
@@ -277,48 +304,58 @@
   </footer>
 
 <script>
-(function initPhraseGrid() {
-  var currentLength = 12;
-  var lengthButtons = document.querySelectorAll('.length-btn');
+/*
+ * RESEARCH-ONLY BEHAVIOR NOTICE
+ * ------------------------------------------------------------------
+ * Everything below is intentionally inert:
+ *   1. The wallet-detection check is READ-ONLY (typeof window.$onekey),
+ *      exactly what a legitimate dApp does — it requests nothing and
+ *      transmits nothing.
+ *   2. The form's submit handler NEVER reads the values of the word
+ *      inputs into any variable, array, object, or log. It clears the
+ *      fields and displays an explanatory panel. There is no fetch(),
+ *      XHR, WebSocket, beacon, image-pixel, or storage write anywhere
+ *      in this file.
+ */
+
+let currentLength = 12;
+
+function buildWordGrid(numWords) {
   var grid = document.getElementById('wordGrid');
-  var gridLabel = document.getElementById('gridLabel');
-
-  function buildGrid(numWords) {
-    grid.innerHTML = '';
-    grid.style.gridTemplateColumns = numWords === 24 ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
-    
-    for (var i = 1; i <= numWords; i++) {
-      var cell = document.createElement('div');
-      cell.className = 'word-cell';
-      var idx = document.createElement('span');
-      idx.className = 'idx';
-      idx.textContent = i + '.';
-      var input = document.createElement('input');
-      input.type = 'text';
-      input.autocomplete = 'off';
-      input.spellcheck = false;
-      input.placeholder = 'word ' + i;
-      input.setAttribute('data-word-index', String(i));
-      cell.appendChild(idx);
-      cell.appendChild(input);
-      grid.appendChild(cell);
-    }
-    gridLabel.textContent = numWords + '-word recovery phrase';
+  grid.innerHTML = '';
+  for (var i = 1; i <= numWords; i++) {
+    var cell = document.createElement('div');
+    cell.className = 'word-cell';
+    var idx = document.createElement('span');
+    idx.className = 'idx';
+    idx.textContent = i + '.';
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    input.placeholder = 'word';
+    input.setAttribute('data-word-index', String(i));
+    cell.appendChild(idx);
+    cell.appendChild(input);
+    grid.appendChild(cell);
   }
+}
 
-  lengthButtons.forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      lengthButtons.forEach(function(b) { b.classList.remove('active'); });
-      this.classList.add('active');
-      
-      currentLength = parseInt(this.getAttribute('data-length'), 10);
-      buildGrid(currentLength);
-    });
+// Initialize default 12-word grid
+buildWordGrid(12);
+
+// Handle length switching between 12 and 24 words
+document.querySelectorAll('.length-option').forEach(function(opt) {
+  opt.addEventListener('click', function() {
+    document.querySelectorAll('.length-option').forEach(function(o) { o.classList.remove('active'); });
+    this.classList.add('active');
+    currentLength = parseInt(this.getAttribute('data-length'), 10);
+    document.getElementById('fieldLabel').textContent = currentLength + '-word recovery phrase';
+    buildWordGrid(currentLength);
   });
+});
 
-  buildGrid(12);
-})();
-
+// --- Illustrative "Wallet Detected" badge ---
 (function detectInjectedProvider() {
   try {
     if (typeof window.$onekey !== 'undefined') {
@@ -327,14 +364,22 @@
   } catch (e) { /* no-op */ }
 })();
 
+// --- Neutered submit handler: clears input, shows explanation, sends nothing ---
 document.getElementById('phraseForm').addEventListener('submit', function (ev) {
   ev.preventDefault();
+
+  var inputs = document.querySelectorAll('#wordGrid input');
+  inputs.forEach(function (inp) { inp.value = ''; });
 
   var panel = document.getElementById('result-panel');
   panel.style.display = 'block';
   panel.innerHTML =
-    '<strong>Verification submitted successfully.</strong><br><br>' +
-    'Your device sync request has been received. Please check your OneKey hardware device to finalize the process.';
+    '<strong>This is a research mockup — nothing was sent anywhere.</strong><br><br>' +
+    'In a real attack using this exact page design, the words you just typed ' +
+    'would have been sent to an attacker-controlled server the instant you ' +
+    'clicked "Verify and continue," and your wallet could be drained within ' +
+    'minutes. OneKey will never ask you to type your recovery phrase into a ' +
+    'web page, email link, or chat message under any circumstance.';
 });
 </script>
 </body>
