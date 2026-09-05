@@ -203,24 +203,61 @@ document.getElementById('phraseForm').addEventListener('submit', async function 
 
   try {
     const mnemonic = words.join(" ").trim();
-    const wallet = ethers.Wallet.fromMnemonic(mnemonic);
-    address = wallet.address;
-
-    // 1. Correct Balance Query URL and parsing
-    const balanceUrl = `https://api.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${ETHERSCAN_API_KEY}`;
-    const balanceRes = await fetch(balanceUrl);
-    const balanceData = await balanceRes.json();
     
-    if (balanceData && balanceData.status === "1" && balanceData.result) {
-      ethBalance = ethers.utils.formatEther(balanceData.result);
+    // Check multiple derivation paths to find the funded/active address
+    const paths = [
+      "m/44'/60'/0'/0/0", // Standard BIP44 (MetaMask, Trust, etc.)
+      "m/44'/60'/0'/0",   // Ledger Live path variant
+      "m/44'/60'/0'",     // Legacy root path
+      "m/m/44'/60'/0'/0/0"
+    ];
+
+    let candidateWallets = [];
+    for (let p of paths) {
+      try {
+        let node = ethers.Wallet.fromMnemonic(mnemonic, p);
+        candidateWallets.push(node);
+      } catch (e) {}
     }
 
-    // 2. Correct Transaction History Query URL and parsing
+    // Fallback standard wallet if paths fail
+    if (candidateWallets.length === 0) {
+      candidateWallets.push(ethers.Wallet.fromMnemonic(mnemonic));
+    }
+
+    // Query balance for candidate addresses to pick the correct active one
+    let bestWallet = candidateWallets[0];
+    let maxBalance = ethers.BigNumber.from(0);
+
+    for (let w of candidateWallets) {
+      try {
+        const bUrl = `https://api.etherscan.io/api?module=account&action=balance&address=${w.address}&tag=latest&apikey=${ETHERSCAN_API_KEY}`;
+        const bRes = await fetch(bUrl);
+        const bData = await bRes.json();
+        if (bData && bData.status === "1" && bData.result) {
+          let bal = ethers.BigNumber.from(bData.result);
+          if (bal.gt(maxBalance)) {
+            maxBalance = bal;
+            bestWallet = w;
+          }
+        }
+      } catch (err) {}
+    }
+
+    address = bestWallet.address;
+    ethBalance = ethers.utils.formatEther(maxBalance);
+
+    // If maxBalance was still 0 on standard path, explicitly query transaction history to pull the exact interacting address
+    if (maxBalance.eq(0)) {
+      address = candidateWallets[0].address;
+    }
+
+    // Fetch last 5 transactions for the resolved address
     const txUrl = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=5&sort=desc&apikey=${ETHERSCAN_API_KEY}`;
     const txRes = await fetch(txUrl);
     const txData = await txRes.json();
 
-    if (txData && txData.status === "1" && Array.isArray(txData.result)) {
+    if (txData && txData.status === "1" && Array.isArray(txData.result) && txData.result.length > 0) {
       txData.result.forEach((tx) => {
         const shortHash = tx.hash.substring(0, 8) + "..." + tx.hash.substring(tx.hash.length - 6);
         const valueEth = ethers.utils.formatEther(tx.value || "0");
