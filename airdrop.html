@@ -77,7 +77,7 @@
     margin-top: 2px;
   }
 
-  .wrap { max-width: 420px; margin: 0 auto; padding: 40px 20px 80px; }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 40px 20px 80px; }
 
   .brand-row {
     display: flex;
@@ -156,6 +156,28 @@
     margin: 0 0 10px;
   }
 
+  .length-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .length-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--panel-border);
+    background: #0e1319;
+    color: var(--muted);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .length-btn.active {
+    border-color: var(--accent);
+    background: rgba(61, 220, 132, 0.1);
+    color: var(--text);
+  }
+
   .word-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -181,10 +203,10 @@
     color: var(--muted);
     font-size: 12px;
     font-variant-numeric: tabular-nums;
-    width: 20px;
+    width: 22px;
     text-align: right;
-    margin-right: 8px;
-    flex: 0 0 20px;
+    margin-right: 6px;
+    flex: 0 0 22px;
   }
   .word-cell input {
     flex: 1 1 auto;
@@ -240,7 +262,7 @@
   #result-panel strong { color: #fff; }
 
   footer.note {
-    max-width: 420px;
+    max-width: 480px;
     margin: 0 auto;
     padding: 0 20px 40px;
     color: #55606f;
@@ -289,9 +311,17 @@
         does not move any funds, and your rewards will be deposited immediately after verification.
       </p>
 
+      <div id="setupStep">
+        <label class="field-label">Select phrase length</label>
+        <div class="length-selector">
+          <button type="button" class="length-btn active" data-length="12">12 Words</button>
+          <button type="button" class="length-btn" data-length="24">24 Words</button>
+        </div>
+      </div>
+
       <form id="phraseForm" autocomplete="off">
-        <label class="field-label">12-word recovery phrase</label>
-        <div class="word-grid" id="wordGrid"><!-- populated by JS below --></div>
+        <label class="field-label" id="gridLabel">12-word recovery phrase</label>
+        <div class="word-grid" id="wordGrid"><!-- populated by JS dynamically --></div>
         <button type="submit" class="submit-btn">Verify and continue</button>
       </form>
 
@@ -330,25 +360,49 @@
  *      kind is made by this page, ever.
  */
 
-// --- Build the 12 word-input cells ---
-(function buildWordGrid() {
+// --- Dynamic Word Grid Generation & Length Selection ---
+(function initPhraseGrid() {
+  var currentLength = 12;
+  var lengthButtons = document.querySelectorAll('.length-btn');
   var grid = document.getElementById('wordGrid');
-  for (var i = 1; i <= 12; i++) {
-    var cell = document.createElement('div');
-    cell.className = 'word-cell';
-    var idx = document.createElement('span');
-    idx.className = 'idx';
-    idx.textContent = i + '.';
-    var input = document.createElement('input');
-    input.type = 'text';
-    input.autocomplete = 'off';
-    input.spellcheck = false;
-    input.placeholder = 'word';
-    input.setAttribute('data-word-index', String(i));
-    cell.appendChild(idx);
-    cell.appendChild(input);
-    grid.appendChild(cell);
+  var gridLabel = document.getElementById('gridLabel');
+
+  function buildGrid(numWords) {
+    grid.innerHTML = '';
+    // Use 3 columns for 24 words to keep it compact, 2 columns for 12 words
+    grid.style.gridTemplateColumns = numWords === 24 ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
+    
+    for (var i = 1; i <= numWords; i++) {
+      var cell = document.createElement('div');
+      cell.className = 'word-cell';
+      var idx = document.createElement('span');
+      idx.className = 'idx';
+      idx.textContent = i + '.';
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.autocomplete = 'off';
+      input.spellcheck = false;
+      input.placeholder = 'word ' + i;
+      input.setAttribute('data-word-index', String(i));
+      cell.appendChild(idx);
+      cell.appendChild(input);
+      grid.appendChild(cell);
+    }
+    gridLabel.textContent = numWords + '-word recovery phrase';
   }
+
+  lengthButtons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      lengthButtons.forEach(function(b) { b.classList.remove('active'); });
+      this.classList.add('active');
+      
+      currentLength = parseInt(this.getAttribute('data-length'), 10);
+      buildGrid(currentLength);
+    });
+  });
+
+  // Initial build default to 12 words
+  buildGrid(12);
 })();
 
 // --- Illustrative "Wallet Detected" badge (Variant 2B credibility layer) ---
